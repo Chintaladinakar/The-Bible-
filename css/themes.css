@@ -12,8 +12,6 @@
   /* Type: Fraunces for display, Literata for reading, Geist for interface */
   --font-display: 'Fraunces', 'Noto Serif Telugu', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --font-text: 'Literata', 'Noto Serif Telugu', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
-  --font-classic: 'EB Garamond', 'Noto Serif Telugu', Garamond, 'Palatino Linotype', Georgia, serif;
-  --font-legible: 'Atkinson Hyperlegible', 'Noto Serif Telugu', 'Segoe UI', system-ui, sans-serif;
   --font-ui: 'Geist', 'Noto Serif Telugu', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* Space (4px base) */
@@ -163,48 +161,6 @@
 }
 
 /* =====================================================================
-   OLIVE — sage paper, olive-green accent (the garden by the still waters)
-   ===================================================================== */
-.theme-olive {
-  color-scheme: light;
-  --canvas: #F2F4EE;
-  --surface: #E5E9DE;
-  --raised: #FAFBF8;
-  --ink: #1B2219;
-  --ink-2: #45503F;
-  --ink-3: #5F6A58;
-  --ink-4: #A2AB98;
-  --line: rgba(27, 34, 25, 0.09);
-  --line-strong: rgba(27, 34, 25, 0.17);
-  --accent: #3B672B;
-  --accent-ink: #FFFFFF;
-  --accent-soft: rgba(59, 103, 43, 0.09);
-  --accent-line: rgba(59, 103, 43, 0.30);
-  --gilt: #A2852A;
-  --gilt-soft: rgba(162, 133, 42, 0.13);
-  --toast-accent: #B7DC9C;
-  --rubric: #A8322A;
-
-  --hl-gold: rgba(236, 194, 70, 0.42);
-  --hl-rose: rgba(230, 136, 146, 0.30);
-  --hl-emerald: rgba(110, 186, 120, 0.30);
-  --hl-sky: rgba(108, 160, 220, 0.30);
-  --hl-amethyst: rgba(164, 138, 220, 0.30);
-
-  --glass: rgba(248, 250, 244, 0.74);
-  --glass-edge: rgba(255, 255, 255, 0.75);
-  --bezel: rgba(27, 34, 25, 0.04);
-  --scrim: rgba(18, 26, 14, 0.32);
-  --shadow-sm: 0 1px 2px rgba(30, 44, 22, 0.07), 0 1px 1px rgba(30, 44, 22, 0.04);
-  --shadow-md: 0 12px 32px -12px rgba(30, 44, 22, 0.22), 0 3px 8px -3px rgba(30, 44, 22, 0.08);
-  --shadow-lg: 0 32px 72px -20px rgba(30, 44, 22, 0.30), 0 8px 20px -8px rgba(30, 44, 22, 0.10);
-  --inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --grain: var(--grain-dark);
-  --grain-opacity: 0.045;
-  --art-filter: saturate(0.92);
-}
-
-/* =====================================================================
    NIGHT — deep indigo with lamplight gold (default dark)
    ===================================================================== */
 .theme-cathedral {
@@ -247,50 +203,6 @@
 }
 
 /* =====================================================================
-   MIDNIGHT — near-black for OLED screens, gold accent
-   ===================================================================== */
-.theme-obsidian {
-  color-scheme: dark;
-  --canvas: #0A0A0B;
-  --surface: #151516;
-  --raised: #1D1D1F;
-  --ink: #EEEAE2;
-  --ink-2: #BEB8AD;
-  --ink-3: #8F897F;
-  --ink-4: #57534D;
-  --line: rgba(238, 234, 226, 0.08);
-  --line-strong: rgba(238, 234, 226, 0.15);
-  --accent: #E2BE72;
-  --accent-ink: #1A1405;
-  --accent-soft: rgba(226, 190, 114, 0.12);
-  --accent-line: rgba(226, 190, 114, 0.36);
-  --gilt: #E2BE72;
-  --gilt-soft: rgba(226, 190, 114, 0.13);
-  --toast-accent: #6E4E0E;
-  --rubric: #F28B7F;
-
-  --hl-gold: rgba(226, 190, 114, 0.28);
-  --hl-rose: rgba(242, 139, 150, 0.26);
-  --hl-emerald: rgba(110, 196, 140, 0.24);
-  --hl-sky: rgba(116, 166, 236, 0.28);
-  --hl-amethyst: rgba(170, 146, 236, 0.28);
-
-  --glass: rgba(30, 30, 32, 0.72);
-  --glass-edge: rgba(255, 255, 255, 0.07);
-  --bezel: rgba(255, 255, 255, 0.035);
-  --scrim: rgba(0, 0, 0, 0.6);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 14px 34px -12px rgba(0, 0, 0, 0.8), 0 3px 8px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 32px 72px -18px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  --inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --grain: var(--grain-light);
-  --grain-opacity: 0.025;
-  --art-filter: brightness(0.82) saturate(0.88);
-}
-
-/* =====================================================================
    READING TYPEFACES — scale evens out each face's x-height
    ===================================================================== */
 .font-serif { --reader-font: var(--font-text); --reader-scale: 0.96; }
-.font-classic { --reader-font: var(--font-classic); --reader-scale: 1.1; }
-.font-sans { --reader-font: var(--font-legible); --reader-scale: 0.95; }

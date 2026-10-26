@@ -1,5 +1,5 @@
 // Scriptura Service Worker - offline app shell, fonts included
-const CACHE_NAME = 'scriptura-pwa-v8';
+const CACHE_NAME = 'scriptura-pwa-v15';
 // Downloaded Bible books live apart from the app shell so app updates never delete them
 const BIBLE_CACHE = 'scriptura-bibles-v1';
 const ASSETS_TO_CACHE = [
@@ -13,8 +13,8 @@ const ASSETS_TO_CACHE = [
   './js/app.js',
   './js/bible-data.js',
   './js/bible-source.js',
+  './js/cross-refs.js',
   './js/storage.js',
-  './js/audio.js',
   './js/pwa.js',
   './js/share-card.js',
   './js/util.js',
@@ -27,9 +27,7 @@ const ASSETS_TO_CACHE = [
   './bibles/tel/books.json',
   './icons/favicon.svg',
   './icons/icon-180.png',
-  './icons/icon-192.png',
-  './assets/daily_banner-800.webp',
-  './assets/daily_banner.webp'
+  './icons/icon-192.png'
 ];
 
 self.addEventListener('install', (event) => {

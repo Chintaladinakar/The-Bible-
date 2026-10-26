@@ -1,6 +1,7 @@
 // Scriptura - chapter source: Bibles bundled with the app (KJV, Telugu) load book by book from /bibles;
 // other translations come from bible-api.com (free, no key) and are kept on this device for offline reading.
 import { CANON_BOOKS, OFFLINE_PASSAGES, RED_LETTER_VERSES, SINGLE_CHAPTER_VERSES } from './bible-data.js';
+import { Consent } from './storage.js';
 
 const API_BASE = 'https://bible-api.com/';
 const CACHE_KEY = 'scriptura_chapters_v1';
@@ -106,7 +107,7 @@ const bookNames = {};
 
 function readOfflineBooks() {
   try {
-    return JSON.parse(localStorage.getItem(OFFLINE_BOOKS_KEY) || '{}') || {};
+    return JSON.parse(Consent.getItem(OFFLINE_BOOKS_KEY) || '{}') || {};
   } catch {
     return {};
   }
@@ -120,7 +121,7 @@ function markOffline(tr, bookId) {
   if (list.has(bookId)) return;
   list.add(bookId);
   all[tr] = [...list];
-  try { localStorage.setItem(OFFLINE_BOOKS_KEY, JSON.stringify(all)); } catch { /* storage full */ }
+  Consent.setItem(OFFLINE_BOOKS_KEY, JSON.stringify(all));
 }
 
 function loadLocalBook(tr, book) {
@@ -151,7 +152,7 @@ let memoryCache = null;
 function loadCache() {
   if (memoryCache) return memoryCache;
   try {
-    memoryCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {};
+    memoryCache = JSON.parse(Consent.getItem(CACHE_KEY) || '{}') || {};
   } catch {
     memoryCache = {};
   }
@@ -165,7 +166,7 @@ function persistCache() {
   if (keys.length > CACHE_LIMIT) keys.slice(0, keys.length - CACHE_LIMIT).forEach(k => delete cache[k]);
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+      if (!Consent.setItem(CACHE_KEY, JSON.stringify(cache))) throw new Error('quota');
       return true;
     } catch {
       const ks = byAge();
@@ -331,15 +332,15 @@ export const BibleSource = {
     const cache = loadCache();
     const count = Object.keys(cache).length;
     let bytes = 0;
-    try { bytes = (localStorage.getItem(CACHE_KEY) || '').length * 2; } catch { /* storage blocked */ }
+    bytes = (Consent.getItem(CACHE_KEY) || '').length * 2;
     return { count, bytes };
   },
 
   async clear() {
     memoryCache = {};
     try {
-      localStorage.removeItem(CACHE_KEY);
-      localStorage.removeItem(OFFLINE_BOOKS_KEY);
+      Consent.removeItem(CACHE_KEY);
+      Consent.removeItem(OFFLINE_BOOKS_KEY);
     } catch { /* storage blocked */ }
     if (!('caches' in window)) return;
     for (const name of await caches.keys()) {

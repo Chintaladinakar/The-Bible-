@@ -136,7 +136,7 @@ export async function renderVerseCard({ text, reference, style = 'night' }) {
   ctx.fillStyle = s.muted;
   ctx.font = `600 36px ${SERIF}`;
   ctx.textAlign = 'right';
-  ctx.fillText('Scriptura', W - PAD, H - 108);
+  ctx.fillText('The Bible', W - PAD, H - 108);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(blob => (blob ? resolve(blob) : reject(new Error('Could not draw the card'))), 'image/png');

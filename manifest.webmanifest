@@ -1,7 +1,7 @@
 {
-  "name": "Scriptura — Bible reader",
-  "short_name": "Scriptura",
-  "description": "A quiet Bible reader: four public-domain translations, chapters saved for offline reading, highlights and notes kept on your device, a daily verse and background music.",
+  "name": "The Bible",
+  "short_name": "The Bible",
+  "description": "A quiet Bible reader: four public-domain translations, chapters saved for offline reading, highlights and notes kept on your device, a daily verse and cross references.",
   "id": "./",
   "start_url": "./index.html",
   "scope": "./",

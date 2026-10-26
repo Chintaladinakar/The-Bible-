@@ -1,6 +1,6 @@
-# The-Bible-
+# The Bible
 
-Scriptura, a Bible reader that works offline. It opens on a home dashboard with the verse of the day, and reads the King James Version and the Telugu Bible side by side. Highlights, bookmarks, notes and reading plans stay on your device, and background music is generated on the device.
+The Bible is a Bible reader that works offline. It opens on a home dashboard with the verse of the day, and reads the King James Version and the Telugu Bible side by side. Tap any verse to see related verses (cross references) with their text. Highlights, bookmarks, notes and reading plans stay on your device.
 
 Plain HTML, CSS and JavaScript, with no build step.
 

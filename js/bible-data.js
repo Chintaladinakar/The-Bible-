@@ -486,3 +486,43 @@ export const SINGLE_CHAPTER_VERSES = {
   '3JN': 14,
   JUD: 25
 };
+
+// "How are you feeling?" on Home: one verse for each feeling, text copied from the bundled KJV and Telugu Bibles
+export const MOOD_VERSES = [
+  { id: 'upset', label: 'Upset', labelTe: 'మనసు కలత చెందినప్పుడు', book: 'John', chapter: 14, verse: 27,
+    text: "Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid.",
+    textTe: "శాంతి మీ కనుగ్రహించి వెళ్లుచున్నాను; నా శాంతినే మీ కనుగ్రహించుచున్నాను; లోకమిచ్చు నట్టుగా నేను మీ కనుగ్రహించుటలేదు; మీ హృదయ మును కలవరపడనియ్యకుడి, వెరవనియ్యకుడి." },
+  { id: 'stuck', label: 'Stuck', labelTe: 'ముందుకు సాగలేనప్పుడు', book: 'Isaiah', chapter: 43, verse: 19,
+    text: "Behold, I will do a new thing; now it shall spring forth; shall ye not know it? I will even make a way in the wilderness, and rivers in the desert.",
+    textTe: "ఇదిగో నేనొక నూతనక్రియ చేయుచున్నాను ఇప్పుడే అది మొలుచును మీరు దాని నాలోచింపరా? నేను అరణ్యములో త్రోవ కలుగజేయుచున్నాను ఎడారిలో నదులు పారజేయుచున్నాను." },
+  { id: 'anxious', label: 'Anxious', labelTe: 'ఆందోళనగా ఉన్నప్పుడు', book: '1 Peter', chapter: 5, verse: 7,
+    text: "Casting all your care upon him; for he careth for you.",
+    textTe: "ఆయన మిమ్మునుగూర్చి చింతించుచున్నాడు గనుక మీ చింత యావత్తు ఆయనమీద వేయుడి." },
+  { id: 'sad', label: 'Sad', labelTe: 'దుఃఖంలో ఉన్నప్పుడు', book: 'Psalms', chapter: 34, verse: 18,
+    text: "The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit.",
+    textTe: "విరిగిన హృదయముగలవారికి యెహోవా ఆసన్నుడు నలిగిన మనస్సుగలవారిని ఆయన రక్షించును." },
+  { id: 'lonely', label: 'Lonely', labelTe: 'ఒంటరిగా అనిపించినప్పుడు', book: 'Psalms', chapter: 27, verse: 10,
+    text: "When my father and my mother forsake me, then the LORD will take me up.",
+    textTe: "నా తలిదండ్రులు నన్ను విడిచినను యెహోవా నన్ను చేరదీయును." },
+  { id: 'afraid', label: 'Afraid', labelTe: 'భయం వేసినప్పుడు', book: 'Psalms', chapter: 56, verse: 3,
+    text: "What time I am afraid, I will trust in thee.",
+    textTe: "నాకు భయము సంభవించు దినమున నిన్ను ఆశ్ర యించుచున్నాను." },
+  { id: 'tired', label: 'Tired', labelTe: 'అలసిపోయినప్పుడు', book: 'Matthew', chapter: 11, verse: 28,
+    text: "Come unto me, all ye that labour and are heavy laden, and I will give you rest.",
+    textTe: "ప్రయాసపడి భారము మోసికొనుచున్న సమస్త జను లారా, నా యొద్దకు రండి; నేను మీకు విశ్రాంతి కలుగ జేతును." },
+  { id: 'angry', label: 'Angry', labelTe: 'కోపం వచ్చినప్పుడు', book: 'Psalms', chapter: 37, verse: 8,
+    text: "Cease from anger, and forsake wrath: fret not thyself in any wise to do evil.",
+    textTe: "కోపము మానుము ఆగ్రహము విడిచిపెట్టుము వ్యసనపడకుము అది కీడుకే కారణము" },
+  { id: 'doubting', label: 'Doubting', labelTe: 'సందేహం కలిగినప్పుడు', book: 'Mark', chapter: 9, verse: 24,
+    text: "And straightway the father of the child cried out, and said with tears, Lord, I believe; help thou mine unbelief.",
+    textTe: "వెంటనే ఆ చిన్నవాని తండ్రినమ్ముచున్నాను, నాకు అపనమ్మకముండకుండ సహాయము చేయుమని బిగ్గరగా చెప్పెను." },
+  { id: 'guilty', label: 'Guilty', labelTe: 'తప్పు చేశానని అనిపించినప్పుడు', book: '1 John', chapter: 1, verse: 9,
+    text: "If we confess our sins, he is faithful and just to forgive us our sins, and to cleanse us from all unrighteousness.",
+    textTe: "మన పాపములను మనము ఒప్పుకొనిన యెడల, ఆయన నమ్మదగినవాడును నీతిమంతుడును గనుక ఆయన మన పాపములను క్షమించి సమస్త దుర్నీతినుండి మనలను పవిత్రులనుగా చేయును." },
+  { id: 'hurt', label: 'Hurt by someone', labelTe: 'ఎవరైనా గాయపరిచినప్పుడు', book: 'Colossians', chapter: 3, verse: 13,
+    text: "Forbearing one another, and forgiving one another, if any man have a quarrel against any: even as Christ forgave you, so also do ye.",
+    textTe: "ఎవడైనను తనకు హానిచేసెనని యొకడనుకొనిన యెడల ఒకని నొకడు సహించుచు ఒకని నొకడు క్షమించుడి, ప్రభువు మిమ్మును క్షమించినలాగున మీరును క్షమించుడి." },
+  { id: 'grateful', label: 'Grateful', labelTe: 'కృతజ్ఞతగా ఉన్నప్పుడు', book: 'Psalms', chapter: 107, verse: 1,
+    text: "O give thanks unto the LORD, for he is good: for his mercy endureth for ever.",
+    textTe: "యెహోవా దయాళుడు ఆయనకు కృతజ్ఞతా స్తుతులు చెల్లించుడి ఆయన కృప నిత్యముండును." }
+];

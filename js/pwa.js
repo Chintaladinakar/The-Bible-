@@ -24,7 +24,7 @@ class PWAController {
             if (!installingWorker) return;
             installingWorker.onstatechange = () => {
               if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                this.showToast('A new version of Scriptura is ready.', 'update', {
+                this.showToast('A new version of The Bible is ready.', 'update', {
                   actionLabel: 'Refresh',
                   onAction: () => window.location.reload(),
                   duration: 12000
@@ -34,7 +34,7 @@ class PWAController {
           };
         })
         .catch((error) => {
-          console.warn('[Scriptura PWA] Service Worker registration failed:', error);
+          console.warn('[The Bible PWA] Service Worker registration failed:', error);
         });
     };
     if (document.readyState === 'complete') register();
@@ -53,7 +53,7 @@ class PWAController {
       this.deferredPrompt = null;
       this.isStandalone = true;
       this.setInstallButtons(false);
-      this.showToast('Scriptura is installed on this device.', 'success');
+      this.showToast('The Bible is installed on this device.', 'success');
     });
 
     // iOS never fires beforeinstallprompt; offer the manual route in settings
@@ -78,9 +78,9 @@ class PWAController {
     } else if (this.isIOS && !this.isStandalone) {
       this.showToast('Tap the Share button, then “Add to Home Screen”.', 'info', { duration: 7000 });
     } else if (this.isStandalone) {
-      this.showToast('Scriptura is already installed.', 'info');
+      this.showToast('The Bible is already installed.', 'info');
     } else {
-      this.showToast('Use your browser’s menu to install Scriptura.', 'info');
+      this.showToast('Use your browser’s menu to install The Bible.', 'info');
     }
   }
 

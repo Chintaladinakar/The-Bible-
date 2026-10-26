@@ -67,6 +67,7 @@ dialog.sheet {
   transform: translateY(100%);
   transition: transform var(--dur-slow) var(--ease-sheet);
 }
+dialog.sheet:not([open]) { display: none; }
 dialog.sheet[open] { display: flex; flex-direction: column; }
 dialog.sheet.is-open { transform: translateY(0); }
 dialog.sheet.is-dragging { transition: none; }
@@ -79,6 +80,21 @@ dialog.sheet::backdrop {
   transition: opacity var(--dur-slow) ease;
 }
 dialog.sheet.is-open::backdrop { opacity: 1; }
+
+/* Browsers without <dialog> (Safari before 15.4): sheets sit above a scrim of their own */
+.sheet-fallback dialog.sheet { z-index: 91; }
+.sheet-scrim { display: none; }
+.sheet-fallback .sheet-scrim {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: var(--scrim, rgba(28, 22, 12, 0.36));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-slow) ease;
+}
+.sheet-fallback.has-sheet .sheet-scrim { opacity: 1; pointer-events: auto; }
 
 .sheet-grip { flex-shrink: 0; touch-action: none; }
 .sheet-handle {
@@ -278,7 +294,7 @@ body.has-verse-toolbar .tab-bar {
   color: var(--ink-3);
   box-shadow: inset 0 0 0 1.5px var(--line-strong);
 }
-.vt-actions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding-top: 6px; }
+.vt-actions { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); padding-top: 6px; }
 .vt-btn {
   display: flex;
   flex-direction: column;
@@ -291,11 +307,68 @@ body.has-verse-toolbar .tab-bar {
   background: transparent;
   color: var(--ink-2);
   font: 600 11.5px/1 var(--font-ui);
+  position: relative;
 }
+.vt-btn:disabled { opacity: 0.4; }
+.vt-badge {
+  position: absolute;
+  top: 3px;
+  left: calc(50% + 6px);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: 700 10.5px/18px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--raised);
+}
+.vt-badge[hidden] { display: none; }
 .vt-btn span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vt-btn .icon { width: 22px; height: 22px; }
 .vt-btn[aria-pressed="true"] { color: var(--accent); }
 .vt-btn[aria-pressed="true"] .icon { fill: currentColor; fill-opacity: 0.18; }
+
+/* =====================================================================
+   BACK TO THE VERSE A CROSS-REFERENCE TRAIL STARTED FROM
+   ===================================================================== */
+.xref-return {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--tabbar-h) + 24px);
+  z-index: var(--z-toolbar);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--canvas);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-50%);
+  animation: pill-in var(--dur-base) var(--ease-out);
+}
+.xref-return[hidden],
+body:not([data-view="reader"]) .xref-return,
+.has-verse-toolbar .xref-return { display: none; }
+.xref-back, .xref-dismiss {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: inherit;
+  font: 600 14px var(--font-ui);
+  white-space: nowrap;
+}
+.xref-back { padding: 0 14px 0 10px; }
+.xref-dismiss { justify-content: center; width: 40px; opacity: 0.7; }
+@keyframes pill-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+}
 
 /* =====================================================================
    TOASTS
@@ -353,7 +426,8 @@ body.has-verse-toolbar .tab-bar {
 
 @media (min-width: 1024px) {
   .tab-bar { display: none; }
-  .verse-toolbar, .toast-stack { left: calc(50% + var(--rail-w) / 2); }
+  .verse-toolbar, .toast-stack, .xref-return { left: calc(50% + var(--rail-w) / 2); }
+  .xref-return { bottom: 28px; }
   .verse-toolbar { bottom: 24px; }
   .toast-stack { bottom: 28px; }
 }
@@ -369,6 +443,8 @@ body.has-verse-toolbar .tab-bar {
    HOVER — only where a precise pointer can hover, so taps never stick
    ===================================================================== */
 @media (hover: hover) and (pointer: fine) {
+  .xref-item:hover .xref-ref { text-decoration: underline; text-underline-offset: 3px; }
+  .xref-back:hover, .xref-dismiss:hover { background: color-mix(in srgb, var(--canvas) 14%, transparent); }
   .btn-primary:hover { background: color-mix(in srgb, var(--accent) 86%, var(--ink)); }
   .btn-secondary:hover { background: var(--surface); }
   .btn-quiet:hover { background: var(--surface); color: var(--ink); }

@@ -1,26 +1,23 @@
 // Scriptura v3 - Master Application Controller
-import { CANON_BOOKS, OFFLINE_PASSAGES, DAILY_DEVOTIONALS, READING_PLANS } from './bible-data.js';
+import { CANON_BOOKS, OFFLINE_PASSAGES, DAILY_DEVOTIONALS, READING_PLANS, MOOD_VERSES } from './bible-data.js';
 import { BibleSource, TRANSLATIONS, translationById, findBook, parseReference, canonPosition } from './bible-source.js';
-import { Storage } from './storage.js';
-import { audio, SOUNDSCAPES } from './audio.js';
+import { Storage, Consent } from './storage.js';
 import { pwa } from './pwa.js';
 import { renderVerseCard } from './share-card.js';
+import { CrossRefs } from './cross-refs.js';
 import { esc, escapeRegExp, icon, $, setText, reduceMotion, clamp, sentenceCase, enDash, todayKey } from './util.js';
 
 // Status-bar colour per theme; Auto pairs Daylight with Night
 const THEME_COLORS = {
   'theme-parchment': '#FBFAF7',
   'theme-sepia': '#F5EEE1',
-  'theme-olive': '#F2F4EE',
-  'theme-cathedral': '#0C1020',
-  'theme-obsidian': '#0A0A0B'
+  'theme-cathedral': '#0C1020'
 };
 const LIGHT_THEME = 'theme-parchment';
 const DARK_THEME = 'theme-cathedral';
 const TABS = ['daily', 'reader', 'search', 'library'];
 const HIGHLIGHT_COLORS = ['gold', 'rose', 'emerald', 'sky', 'amethyst'];
 const COLOR_NAMES = { gold: 'Gold', rose: 'Rose', emerald: 'Green', sky: 'Blue', amethyst: 'Violet' };
-const LEADING_OPTIONS = [1.55, 1.75, 1.95];
 const SECTION_LABELS = {
   'OT-Law': 'The Law',
   'OT-History': 'History',
@@ -93,7 +90,7 @@ class ScripturaApp {
       if (this.preferences.theme === 'auto') this.applyPreferences();
     });
 
-    const last = Storage.getLastRead();
+    const last = Storage.getLastRead() || { book: 'Psalms', chapter: 23 };
     const book = findBook(last.book) || findBook('Psalms');
     this.currentBook = book.name;
     this.currentChapter = clamp(Number(last.chapter) || 1, 1, book.chapters);
@@ -115,24 +112,15 @@ class ScripturaApp {
     this.renderContinueCard();
     this.renderPlans();
     this.renderPassageStrip();
-    this.renderMusic();
     this.renderLibrary();
     this.handleSearch('');
     this.updateSearchScope();
-    this.updateStorageNote();
     this.ensureBookNames();
 
     // The app opens on Home unless a link points at a chapter or another tab
     // A chapter left in the address bar only sets where "Continue reading" goes; shortcuts add "open" to jump straight in
     const launchTab = route?.open ? (route.book ? 'reader' : route.tab) : 'daily';
     this.switchTab(launchTab || 'daily', { restoreScroll: false });
-
-    // Browsers block audio until the first interaction; resume the music then
-    if (this.preferences.ambientSound) {
-      document.addEventListener('pointerdown', () => {
-        if (this.preferences.ambientSound) audio.toggleAmbient(true, this.preferences.ambientVolume, this.preferences.ambientKind);
-      }, { once: true });
-    }
 
     requestAnimationFrame(() => document.documentElement.classList.add('is-ready'));
   }
@@ -150,7 +138,7 @@ class ScripturaApp {
     const root = document.documentElement;
     const theme = this.resolvedTheme();
     [...root.classList].filter(c => c.startsWith('theme-') || c.startsWith('font-')).forEach(c => root.classList.remove(c));
-    root.classList.add(theme, this.preferences.fontFamily || 'font-serif');
+    root.classList.add(theme, 'font-serif');
 
     // Status bar: follow the system in auto mode, otherwise pin both schemes to the chosen theme
     document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
@@ -165,17 +153,11 @@ class ScripturaApp {
     if (sizeInput) sizeInput.value = this.preferences.fontSize;
     setText('label-font-size', `${this.preferences.fontSize} px`);
 
-    const redCheck = $('check-red-letters');
-    if (redCheck) redCheck.checked = !!this.preferences.redLetter;
     const parallelCheck = $('check-parallel');
     if (parallelCheck) parallelCheck.checked = !!this.preferences.parallel;
-    document.querySelectorAll('[data-pref="ambient"]').forEach(el => { el.checked = !!this.preferences.ambientSound; });
 
-    const nearestLeading = LEADING_OPTIONS.reduce((a, b) => (Math.abs(b - this.preferences.lineHeight) < Math.abs(a - this.preferences.lineHeight) ? b : a));
     const checks = [
       ['.theme-btn', btn => btn.dataset.theme === this.preferences.theme],
-      ['.font-btn', btn => btn.dataset.font === this.preferences.fontFamily],
-      ['.leading-btn', btn => Number(btn.dataset.leading) === nearestLeading],
       ['[data-translation]', btn => btn.dataset.translation === this.preferences.translation]
     ];
     checks.forEach(([selector, isOn]) => {
@@ -183,16 +165,17 @@ class ScripturaApp {
     });
 
     const notes = {
-      kjv: 'King James Version, public domain. Built into Scriptura, so every chapter opens instantly.',
-      tel: 'Telugu Bible (తెలుగు బైబిల్), public domain text from Arul John’s Bible-telugu collection. Built into Scriptura; each book loads the first time you open it.'
+      kjv: 'King James Version, public domain. Built into the app, so every chapter opens instantly.',
+      tel: 'Telugu Bible (తెలుగు బైబిల్), public domain text from Arul John’s Bible-telugu collection. Built into the app; each book loads the first time you open it.'
     };
     const tr = translationById(this.preferences.translation);
     setText('translation-note', notes[tr.id] || `${tr.name}, public domain. Chapters load from bible-api.com and stay on this device for offline reading.`);
     this.updateOfflineRow();
+    this.updateDataRow();
   }
 
   setPref(key, value) {
-    const anchor = ['fontSize', 'lineHeight', 'fontFamily'].includes(key) ? this.captureReadingAnchor() : null;
+    const anchor = key === 'fontSize' ? this.captureReadingAnchor() : null;
     this.preferences[key] = value;
     Storage.savePreferences(this.preferences);
     this.applyPreferences();
@@ -229,6 +212,7 @@ class ScripturaApp {
     this.setPref('parallel', on);
     this.ensureBookNames();
     if (this.hasText()) this.paintChapter();
+    this.renderPassageStrip();
   }
 
   // "Download for offline" row in settings: only bundled Bibles can be saved whole
@@ -270,60 +254,8 @@ class ScripturaApp {
       this.downloading = false;
       this.updateOfflineRow();
       this.updateSearchScope();
-      this.updateStorageNote();
       if (this.activeTab === 'search') this.handleSearch($('search-query-input').value);
     }
-  }
-
-  setAmbient(on) {
-    this.preferences.ambientSound = on;
-    Storage.savePreferences(this.preferences);
-    document.querySelectorAll('[data-pref="ambient"]').forEach(el => { el.checked = on; });
-    audio.toggleAmbient(on, this.preferences.ambientVolume, this.preferences.ambientKind);
-    if (!on) this.setMusicTimer(0);
-    this.renderMusic();
-  }
-
-  // =====================================================================
-  // Music card on Home
-  // =====================================================================
-  renderMusic() {
-    const kind = SOUNDSCAPES.find(s => s.id === this.preferences.ambientKind) || SOUNDSCAPES[0];
-    const playing = !!this.preferences.ambientSound;
-    setText('music-title', kind.name);
-    setText('music-sub', playing
-      ? `${kind.sub} · playing${this.musicTimerEnds ? ` · stops at ${new Date(this.musicTimerEnds).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}` : ''}`
-      : `${kind.sub} · made on this device, keeps playing while you read`);
-    const play = $('music-play');
-    play.setAttribute('aria-pressed', String(playing));
-    play.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
-    $('music-play').closest('.home-music').classList.toggle('is-playing', playing);
-    $('music-kinds').innerHTML = SOUNDSCAPES.map(s => `
-      <button class="music-kind pressable" role="radio" aria-checked="${s.id === kind.id}" data-kind="${s.id}">${esc(s.name)}</button>
-    `).join('');
-    $('music-volume').value = Math.round((this.preferences.ambientVolume ?? 0.35) * 100);
-    document.querySelectorAll('#music-timer .timer-chip').forEach(chip => {
-      chip.setAttribute('aria-checked', String(Number(chip.dataset.minutes) === (this.musicTimerMinutes || 0)));
-    });
-  }
-
-  setMusicKind(id) {
-    this.preferences.ambientKind = id;
-    Storage.savePreferences(this.preferences);
-    if (this.preferences.ambientSound) audio.startAmbient(this.preferences.ambientVolume, id);
-    this.renderMusic();
-  }
-
-  // Sleep timer: stop the music after a while
-  setMusicTimer(minutes) {
-    clearTimeout(this.musicTimer);
-    this.musicTimerMinutes = minutes;
-    this.musicTimerEnds = minutes ? Date.now() + minutes * 60000 : null;
-    if (minutes) this.musicTimer = setTimeout(() => {
-      this.musicTimerMinutes = 0;
-      this.musicTimerEnds = null;
-      this.setAmbient(false);
-    }, minutes * 60000);
   }
 
   renderTranslationOptions() {
@@ -406,11 +338,25 @@ class ScripturaApp {
     $('btn-action-copy').addEventListener('click', () => this.copySelected());
     $('btn-action-share').addEventListener('click', () => this.openCardGenerator());
     $('btn-action-memorize').addEventListener('click', () => this.openMemorize());
+    $('btn-action-related').addEventListener('click', () => this.openCrossRefs());
+
+    // Cross references
+    $('xref-body').addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-xref-filter]');
+      if (chip && this.xref?.refs) {
+        this.xref.filter = chip.dataset.xrefFilter;
+        this.renderCrossRefs();
+        $('xref-body').querySelector('.xref-filters')?.scrollIntoView({ block: 'start' });
+        return;
+      }
+      const item = e.target.closest('[data-xref]');
+      if (item) this.followCrossRef(item.dataset.xref);
+    });
+    $('xref-back').addEventListener('click', () => this.returnFromCrossRef());
+    $('xref-dismiss').addEventListener('click', () => this.hideCrossRefReturn());
 
     // Settings
     document.querySelectorAll('.theme-btn').forEach(btn => btn.addEventListener('click', () => this.setPref('theme', btn.dataset.theme)));
-    document.querySelectorAll('.font-btn').forEach(btn => btn.addEventListener('click', () => this.setPref('fontFamily', btn.dataset.font)));
-    document.querySelectorAll('.leading-btn').forEach(btn => btn.addEventListener('click', () => this.setPref('lineHeight', Number(btn.dataset.leading))));
     $('translation-options').addEventListener('click', (e) => {
       const btn = e.target.closest('[data-translation]');
       if (btn) this.setTranslation(btn.dataset.translation);
@@ -418,39 +364,19 @@ class ScripturaApp {
     $('input-font-size').addEventListener('input', (e) => this.setPref('fontSize', parseInt(e.target.value, 10)));
     $('btn-size-down').addEventListener('click', () => this.setPref('fontSize', clamp(this.preferences.fontSize - 1, 16, 28)));
     $('btn-size-up').addEventListener('click', () => this.setPref('fontSize', clamp(this.preferences.fontSize + 1, 16, 28)));
-    $('check-red-letters').addEventListener('change', (e) => {
-      this.setPref('redLetter', e.target.checked);
-      if (this.hasText()) this.paintChapter();
-    });
-    document.querySelectorAll('[data-pref="ambient"]').forEach(el => el.addEventListener('change', (e) => this.setAmbient(e.target.checked)));
     $('check-parallel').addEventListener('change', (e) => this.setParallel(e.target.checked));
 
-    // Music card
-    $('music-play').addEventListener('click', () => { pwa.haptic(); this.setAmbient(!this.preferences.ambientSound); });
-    $('music-kinds').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-kind]');
-      if (btn) this.setMusicKind(btn.dataset.kind);
-    });
-    $('music-volume').addEventListener('input', (e) => {
-      this.preferences.ambientVolume = Number(e.target.value) / 100;
-      Storage.savePreferences(this.preferences);
-      audio.setAmbientVolume(this.preferences.ambientVolume);
-    });
-    $('music-timer').addEventListener('click', (e) => {
-      const chip = e.target.closest('[data-minutes]');
-      if (!chip) return;
-      const minutes = Number(chip.dataset.minutes);
-      if (minutes && !this.preferences.ambientSound) this.setAmbient(true);
-      this.setMusicTimer(minutes);
-      this.renderMusic();
-    });
     $('btn-download-bible').addEventListener('click', () => this.downloadBible());
-    $('btn-clear-cache').addEventListener('click', async () => {
-      await BibleSource.clear();
-      this.updateStorageNote();
-      this.updateSearchScope();
-      this.updateOfflineRow();
-      pwa.showToast('Downloads cleared. Your notes and highlights are untouched.');
+
+    // Permission to save on this device
+    Consent.onSaveAttempt(state => this.onSaveAttempt(state));
+    $('consent-allow').addEventListener('click', () => this.allowSaving());
+    $('consent-later').addEventListener('click', () => this.declineSaving());
+    $('btn-data-toggle').addEventListener('click', () => this.toggleSaving());
+    $('btn-data-delete').addEventListener('click', () => {
+      Consent.revoke();
+      this.updateDataRow();
+      pwa.showToast('Data from earlier visits is deleted from this device.');
     });
 
     // Picker
@@ -686,6 +612,7 @@ class ScripturaApp {
     $('tab-bar').style.setProperty('--tab-index', TABS.indexOf(tabId));
     document.querySelectorAll('.view').forEach(view => view.classList.toggle('is-active', view.id === `view-${tabId}`));
 
+    if (tabId === 'reader' && this.chapter) Storage.saveLastRead(this.chapter.book.name, this.chapter.ch);
     if (tabId === 'library') this.renderLibrary();
     if (tabId === 'daily') this.renderContinueCard();
     if (tabId === 'search') this.updateSearchScope();
@@ -778,7 +705,7 @@ class ScripturaApp {
       this.schedulePrefetch();
     }
 
-    Storage.saveLastRead(book.name, ch);
+    if (this.activeTab === 'reader') Storage.saveLastRead(book.name, ch);
     this.updateLocationUI();
     this.updateRailStreak();
     if (this.activeTab === 'reader') this.syncHash();
@@ -786,6 +713,7 @@ class ScripturaApp {
 
   paintChapter({ animate = false, revealVerse = null } = {}) {
     const { book, ch, curated, status } = this.chapter;
+    CrossRefs.prefetch(book.id);
     const label = this.chapterLabel(book.name, ch);
     const excerpt = status === 'curated' && BibleSource.isExcerpt(curated);
     const teluguHead = this.preferences.translation === 'tel' && status !== 'curated';
@@ -806,7 +734,7 @@ class ScripturaApp {
     const sub = $('chapter-subtitle');
     sub.textContent = subtitle || '';
     sub.classList.toggle('hidden', !subtitle);
-    document.title = `${label} — Scriptura`;
+    document.title = `${label} — The Bible`;
 
     this.renderNotice();
 
@@ -944,7 +872,7 @@ class ScripturaApp {
     } else if (status === 'curated') {
       const excerpt = BibleSource.isExcerpt(curated);
       if (this.preferences.translation !== 'kjv') {
-        html = `<p>Showing the English passage saved with Scriptura. The ${esc(translationById(this.preferences.translation).name)} for ${esc(label)} downloads when you’re online.</p>`;
+        html = `<p>Showing the English passage saved with the app. The ${esc(translationById(this.preferences.translation).name)} for ${esc(label)} downloads when you’re online.</p>`;
       } else if (excerpt && !navigator.onLine) {
         html = `<p><strong>Selected verses.</strong> Connect to the internet to read all of ${esc(label)}; it will stay on this device afterwards.</p>`;
       } else if (excerpt && fetchError) {
@@ -968,7 +896,6 @@ class ScripturaApp {
       const prev = this.chapter;
       if (prev.book !== book || prev.ch !== ch) return;
       this.updateSearchScope();
-      this.updateStorageNote();
 
       if (prev.status === 'curated') {
         if (tr === 'kjv' && prev.verses.length === verses.length) {
@@ -1025,7 +952,7 @@ class ScripturaApp {
       const tr = this.preferences.translation;
       if (BibleSource.has(tr, book.id, next.chapter)) return;
       BibleSource.fetchChapter(tr, book, next.chapter)
-        .then(() => { this.updateSearchScope(); this.updateStorageNote(); })
+        .then(() => this.updateSearchScope())
         .catch(() => { /* a missed prefetch is harmless */ });
     }, 5000);
   }
@@ -1042,15 +969,12 @@ class ScripturaApp {
 
   renderChapterNav() {
     const nav = $('chapter-nav');
-    const tr = this.preferences.translation;
     const card = (target, dir) => {
       if (!target) return '<span class="cn-btn cn-empty" aria-hidden="true"></span>';
       const book = findBook(target.book);
       const curated = BibleSource.curated(book.id, target.chapter);
-      const saved = !curated && BibleSource.savedChapters(tr, book).has(target.chapter);
       let sub = '';
       if (curated) sub = curated.title;
-      else if (saved) sub = 'Saved on this device';
       else if (target.book !== this.currentBook) sub = this.sectionLabel(book);
       const direction = dir === 'prev'
         ? `${icon('chev-left', 'icon-xs')}Previous`
@@ -1256,6 +1180,7 @@ class ScripturaApp {
     const marked = Storage.getBookmarks().some(b => sameVerse(b, book, chapter, verseNum));
     $('btn-action-bookmark').setAttribute('aria-pressed', String(marked));
     setText('vt-bookmark-label', marked ? 'Saved' : 'Bookmark');
+    this.updateRelatedButton();
   }
 
   dismissVerseAction({ restoreFocus = false } = {}) {
@@ -1491,6 +1416,169 @@ class ScripturaApp {
     `).join('');
   }
 
+  // =====================================================================
+  // Cross references
+  // =====================================================================
+  // Count on the toolbar button; the book's file usually arrived while the chapter was read
+  updateRelatedButton() {
+    const sel = this.selectedVerse;
+    const btn = $('btn-action-related');
+    const badge = $('vt-related-count');
+    const book = sel && findBook(sel.book);
+    if (!book) return;
+    const count = CrossRefs.countNow(book.id, sel.chapter, sel.verseNum);
+    if (count === null) {
+      badge.hidden = true;
+      btn.disabled = false;
+      btn.setAttribute('aria-label', 'Related verses');
+      CrossRefs.forVerse(book.id, sel.chapter, sel.verseNum)
+        .then(() => { if (this.selectedVerse === sel) this.updateRelatedButton(); })
+        .catch(() => { /* the sheet explains a failed load */ });
+      return;
+    }
+    btn.disabled = count === 0;
+    badge.hidden = count === 0;
+    badge.textContent = count > 99 ? '99+' : String(count);
+    btn.setAttribute('aria-label', count ? `Related verses, ${count}` : 'No related verses');
+  }
+
+  async openCrossRefs(source = null, { filter = 'ALL', scrollTop = 0 } = {}) {
+    if (!source) {
+      if (!this.selectedVerse) return;
+      const { book, chapter, verseNum, text } = this.selectedVerse;
+      source = { book, chapter, verse: verseNum, text, lang: this.preferences.translation === 'tel' ? 'te' : 'en' };
+      this.dismissVerseAction();
+    }
+    const book = findBook(source.book);
+    if (!book) return;
+    this.xref = { source, filter, refs: null };
+    const body = $('xref-body');
+    body.innerHTML = `${this.crossRefSourceHTML(source)}<p class="xref-status">Finding related verses…</p>`;
+    this.openDrawer('xref-sheet');
+    let refs;
+    try {
+      refs = await CrossRefs.forVerse(book.id, source.chapter, source.verse);
+    } catch {
+      if (this.xref?.source !== source) return;
+      body.innerHTML = `${this.crossRefSourceHTML(source)}<p class="xref-status">Related verses couldn’t load. Check your connection and try again.</p>`;
+      return;
+    }
+    if (this.xref?.source !== source) return;
+    this.xref.refs = refs;
+    this.renderCrossRefs();
+    body.scrollTop = scrollTop;
+  }
+
+  crossRefSourceHTML(source) {
+    return `<figure class="xref-source">
+      <figcaption class="xref-source-ref">${esc(this.verseLabel(source.book, source.chapter, source.verse))}</figcaption>
+      <blockquote class="xref-source-text" lang="${source.lang}">${esc(source.text)}</blockquote>
+    </figure>`;
+  }
+
+  crossRefLabel(ref) {
+    return `${this.chapterLabel(ref.book.name, ref.chapter)}:${ref.verse}${ref.to > ref.verse ? `–${ref.to}` : ''}`;
+  }
+
+  renderCrossRefs() {
+    const { source, refs, filter } = this.xref;
+    const counts = {
+      ALL: refs.length,
+      OT: refs.filter(r => r.book.testament === 'OT').length,
+      NT: refs.filter(r => r.book.testament === 'NT').length
+    };
+    const shown = filter === 'ALL' ? refs : refs.filter(r => r.book.testament === filter);
+    const groups = [];
+    shown.forEach(r => {
+      const last = groups[groups.length - 1];
+      if (last && last.book === r.book) last.refs.push(r);
+      else groups.push({ book: r.book, refs: [r] });
+    });
+
+    const telugu = this.preferences.translation === 'tel';
+    const summary = refs.length
+      ? `${refs.length} related ${refs.length === 1 ? 'verse' : 'verses'} · tap one to read it in its chapter`
+      : 'No cross references are listed for this verse.';
+    const chips = counts.OT && counts.NT
+      ? `<div class="chip-row chip-row--scroll xref-filters" role="group" aria-label="Show related verses from">${[['ALL', 'All'], ['OT', 'Old Testament'], ['NT', 'New Testament']].map(([id, label]) =>
+          `<button class="chip pressable${filter === id ? ' is-active' : ''}" data-xref-filter="${id}" aria-pressed="${filter === id}">${label}<span class="chip-count">${counts[id]}</span></button>`).join('')}</div>`
+      : '';
+    const kjvNote = !telugu && this.preferences.translation !== 'kjv' ? '<p class="xref-note">Related verses are shown in the King James Version.</p>' : '';
+
+    $('xref-body').innerHTML = `${this.crossRefSourceHTML(source)}
+      <p class="xref-summary">${summary}</p>${chips}${kjvNote}
+      ${groups.map(g => `<section class="xref-group" data-book="${g.book.id}">
+        <h3 class="xref-book"${telugu ? ' lang="te"' : ''}>${esc(BibleSource.bookName(telugu ? 'tel' : 'kjv', g.book))}<span>${g.refs.length}</span></h3>
+        <ul class="xref-list">${g.refs.map(r => `<li>
+          <button class="xref-item pressable" data-xref="${g.book.id}|${r.chapter}|${r.verse}">
+            <span class="xref-ref"${telugu ? ' lang="te"' : ''}>${esc(this.crossRefLabel(r))}</span>
+            <span class="xref-text" data-range="${r.chapter}|${r.verse}|${r.to}"><span class="xref-skel"></span><span class="xref-skel"></span></span>
+          </button></li>`).join('')}</ul>
+      </section>`).join('')}`;
+    this.observeCrossRefText();
+  }
+
+  // Verse text fills in book by book as each group nears the view, so long lists stay quick
+  observeCrossRefText() {
+    this.xrefObserver?.disconnect();
+    const body = $('xref-body');
+    const groups = body.querySelectorAll('.xref-group');
+    if (!('IntersectionObserver' in window)) {
+      groups.forEach(g => this.fillCrossRefGroup(g));
+      return;
+    }
+    this.xrefObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        this.xrefObserver.unobserve(entry.target);
+        this.fillCrossRefGroup(entry.target);
+      });
+    }, { root: body, rootMargin: '400px 0px' });
+    groups.forEach(g => this.xrefObserver.observe(g));
+  }
+
+  async fillCrossRefGroup(group) {
+    const book = CANON_BOOKS.find(b => b.id === group.dataset.book);
+    const tr = this.preferences.translation === 'tel' ? 'tel' : 'kjv';
+    for (const slot of group.querySelectorAll('[data-range]')) {
+      const [chapter, from, to] = slot.dataset.range.split('|').map(Number);
+      try {
+        const verses = (await BibleSource.fetchChapter(tr, book, chapter)).filter(v => v.num >= from && v.num <= to);
+        if (!verses.length) throw new Error('missing');
+        slot.lang = tr === 'tel' ? 'te' : 'en';
+        slot.innerHTML = verses.map(v => `${to > from ? `<sup>${v.num}</sup>` : ''}${esc(v.text)}`).join(' ');
+      } catch {
+        slot.innerHTML = '<span class="xref-missing">Tap to read this verse</span>';
+      }
+    }
+  }
+
+  followCrossRef(spec) {
+    const [id, chapter, verse] = spec.split('|');
+    const book = CANON_BOOKS.find(b => b.id === id);
+    if (!book || !this.xref) return;
+    const { source } = this.xref;
+    this.xrefReturn = { source, filter: this.xref.filter, scrollTop: $('xref-body').scrollTop };
+    this.closeSheet($('xref-sheet'), { restoreFocus: false });
+    this.loadPassage(book.name, Number(chapter), Number(verse));
+    setText('xref-back-label', `Back to ${this.verseLabel(source.book, source.chapter, source.verse)}`);
+    $('xref-return').hidden = false;
+  }
+
+  hideCrossRefReturn() {
+    this.xrefReturn = null;
+    $('xref-return').hidden = true;
+  }
+
+  // Back to the verse the trail started from, with its list open where it was left
+  returnFromCrossRef() {
+    const back = this.xrefReturn;
+    if (!back) return;
+    this.hideCrossRefReturn();
+    this.loadPassage(back.source.book, back.source.chapter, back.source.verse);
+    this.openCrossRefs(back.source, { filter: back.filter, scrollTop: back.scrollTop });
+  }
+
   openMemorize() {
     if (!this.selectedVerse) return;
     const { book, chapter, verseNum, text } = this.selectedVerse;
@@ -1538,15 +1626,19 @@ class ScripturaApp {
 
   renderCanonMatrix() {
     const tr = this.preferences.translation;
-    const savedByBook = new Map();
-    BibleSource.savedList(tr).forEach(p => savedByBook.set(p.book, (savedByBook.get(p.book) || 0) + 1));
+    // Chapters the reader has finished, per book
+    const readByBook = new Map();
+    Object.keys(Storage.getReadLog()).forEach(key => {
+      const book = key.split('|')[0];
+      readByBook.set(book, (readByBook.get(book) || 0) + 1);
+    });
     const f = this.canonFilter;
     const list = CANON_BOOKS.filter(b => f === 'ALL'
       || (f === 'OT' && b.testament === 'OT')
       || (f === 'NT' && b.testament === 'NT')
       || (f === 'POETRY' && b.genre === 'Poetry & Wisdom')
       || (f === 'GOSPELS' && b.genre === 'Gospels')
-      || (f === 'SAVED' && savedByBook.has(b.name)));
+      || (f === 'STARTED' && readByBook.has(b.name)));
 
     const groups = [];
     list.forEach(book => {
@@ -1560,7 +1652,7 @@ class ScripturaApp {
       <section class="book-group">
         <h3 class="book-group-title">${esc(SECTION_LABELS[g.key])}<span>${g.testament === 'OT' ? 'Old Testament' : 'New Testament'}</span></h3>
         <div class="book-grid">${g.books.map(b => {
-          const saved = savedByBook.get(b.name) || 0;
+          const read = Math.min(readByBook.get(b.name) || 0, b.chapters);
           const current = b.name === this.currentBook;
           // Bilingual names whenever Telugu is in play: the reading language first, the other beneath
           const bilingual = tr === 'tel' || this.preferences.parallel;
@@ -1569,19 +1661,18 @@ class ScripturaApp {
           const [primary, primaryLang, secondary, secondaryLang] = tr === 'tel' && hasTelugu
             ? [teluguName, 'te', b.name, 'en']
             : [b.name, 'en', hasTelugu ? teluguName : '', 'te'];
-          const savedTag = saved && saved < b.chapters ? `<span class="book-saved"><i class="dot"></i>${saved} saved</span>`
-            : saved ? '<span class="book-saved"><i class="dot"></i>offline</span>' : '';
+          const readTag = read ? `<span class="book-read">${read === b.chapters ? 'all read' : `${read} read`}</span>` : '';
           return `<button class="book-btn pressable${current ? ' is-current' : ''}" data-pick-book="${b.id}"${current ? ' aria-current="true"' : ''}>
             <span class="book-name" lang="${primaryLang}">${esc(primary)}</span>
             ${secondary ? `<span class="book-alt" lang="${secondaryLang}">${esc(secondary)}</span>` : ''}
-            <span class="book-meta">${b.chapters} ${b.chapters === 1 ? 'chapter' : 'chapters'}${savedTag}</span>
+            <span class="book-meta">${b.chapters} ${b.chapters === 1 ? 'chapter' : 'chapters'}${readTag}</span>
           </button>`;
         }).join('')}</div>
       </section>`).join('') || `
       <div class="empty-state">
-        <span class="empty-icon">${icon('cloud')}</span>
-        <h3 class="empty-title">Nothing saved yet</h3>
-        <p class="empty-text">Chapters you open are kept here so you can read them without a connection.</p>
+        <span class="empty-icon">${icon('read')}</span>
+        <h3 class="empty-title">No books started yet</h3>
+        <p class="empty-text">Read a chapter to the end and its book shows up here.</p>
       </div>`;
 
     document.querySelectorAll('#canon-filters .chip').forEach(chip => {
@@ -1599,19 +1690,17 @@ class ScripturaApp {
     }
     this.pickerBook = book;
     this.pickerScroll = $('picker-body').scrollTop;
-    const saved = BibleSource.savedChapters(this.preferences.translation, book);
     const log = Storage.getReadLog();
     let anyRead = false;
     $('chapter-matrix').innerHTML = Array.from({ length: book.chapters }, (_, i) => i + 1).map(n => {
-      const isSaved = saved.has(n);
       const isRead = !!log[`${book.name}|${n}`];
       const isCurrent = book.name === this.currentBook && n === this.currentChapter;
       anyRead = anyRead || isRead;
-      const cls = ['ch-btn', 'pressable', isSaved && 'is-saved', isRead && 'is-read', isCurrent && 'is-current'].filter(Boolean).join(' ');
-      const label = [`Chapter ${n}`, isSaved && 'saved on this device', isRead && 'read', isCurrent && 'now reading'].filter(Boolean).join(', ');
+      const cls = ['ch-btn', 'pressable', isRead && 'is-read', isCurrent && 'is-current'].filter(Boolean).join(' ');
+      const label = [`Chapter ${n}`, isRead && 'read', isCurrent && 'now reading'].filter(Boolean).join(', ');
       return `<button class="${cls}" data-pick-chapter="${n}" aria-label="${label}"${isCurrent ? ' aria-current="true"' : ''}>${n}</button>`;
     }).join('');
-    $('picker-legend').classList.toggle('hidden', !saved.size && !anyRead);
+    $('picker-legend').classList.toggle('hidden', !anyRead);
     this.showPickerPane('chapters', 'forward');
     setText('picker-title', this.preferences.translation === 'tel' ? BibleSource.bookName('tel', book) : book.name);
   }
@@ -1682,7 +1771,8 @@ class ScripturaApp {
   }
 
   renderContinueCard() {
-    const last = Storage.getLastRead();
+    const saved = Storage.getLastRead();
+    const last = saved || { book: 'Psalms', chapter: 23 };
     const book = findBook(last.book) || findBook('Psalms');
     const chapter = clamp(Number(last.chapter) || 1, 1, book.chapters);
     const curated = BibleSource.curated(book.id, chapter);
@@ -1692,18 +1782,18 @@ class ScripturaApp {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 6);
     const thisWeek = Object.values(log).filter(d => d >= todayKey(weekAgo)).length;
-    const saved = BibleSource.savedList(this.preferences.translation).length;
+    const total = Object.keys(log).length;
 
     $('continue-card').innerHTML = `
       <div class="continue-card bezel-core">
-        <span class="continue-label">Continue reading</span>
+        <span class="continue-label">${saved ? 'Continue reading' : 'Start reading'}</span>
         <span class="continue-title">${esc(label)}</span>
-        <span class="continue-sub">${esc(curated ? curated.title : this.sectionLabel(book))}</span>
-        <button class="btn btn-primary pressable" data-goto="${esc(book.name)}|${chapter}" aria-label="Continue reading ${esc(label)}">${icon('arrow-right')}</button>
+        <span class="continue-sub">${esc(saved ? (curated ? curated.title : this.sectionLabel(book)) : `A good first chapter: ${curated ? curated.title : this.sectionLabel(book)}`)}</span>
+        <button class="btn btn-primary pressable" data-goto="${esc(book.name)}|${chapter}" aria-label="${saved ? 'Continue reading' : 'Start reading'} ${esc(label)}">${icon('arrow-right')}</button>
         <div class="continue-stats">
-          <span>${icon('flame', 'icon-sm')}${streak ? `${streak}-day streak` : 'Start a streak today'}</span>
-          ${thisWeek ? `<span>${icon('check', 'icon-sm')}${thisWeek} ${thisWeek === 1 ? 'chapter' : 'chapters'} read this week</span>` : ''}
-          <span>${icon('cloud', 'icon-sm')}${saved} saved offline</span>
+          <span>${icon('flame', 'icon-sm')}${streak ? `${streak}-day streak` : 'Finish a chapter to start a streak'}</span>
+          ${thisWeek ? `<span>${icon('check', 'icon-sm')}${thisWeek} ${thisWeek === 1 ? 'chapter' : 'chapters'} this week</span>` : ''}
+          ${total > thisWeek ? `<span>${icon('read', 'icon-sm')}${total} read in all</span>` : ''}
         </div>
       </div>`;
     this.renderHomeTiles();
@@ -1721,14 +1811,16 @@ class ScripturaApp {
     setText('tile-library-sub', parts.length ? parts.slice(0, 2).join(' · ') : 'Highlights and notes');
   }
 
-  // Home strip of well-loved passages (the chapters that ship inside the app)
+  // Home strip "How are you feeling?": a verse for each feeling, opening the chapter at that verse
   renderPassageStrip() {
-    const picks = Object.values(OFFLINE_PASSAGES).sort((a, b) => canonPosition(a.book, a.chapter) - canonPosition(b.book, b.chapter));
-    $('passage-strip').innerHTML = picks.map(p => `
-      <button class="passage-card pressable" data-goto="${esc(p.book)}|${p.chapter}">
-        <span class="pc-ref">${esc(this.chapterLabel(p.book, p.chapter))}</span>
-        <span class="pc-title" lang="en">${esc(p.title)}</span>
-        <span class="pc-sub" lang="en">${esc(p.subtitle)}</span>
+    const telugu = this.preferences.translation === 'tel';
+    const showTe = telugu || this.preferences.parallel;
+    $('passage-strip').innerHTML = MOOD_VERSES.map(m => `
+      <button class="mood-card pressable" data-goto="${esc(m.book)}|${m.chapter}|${m.verse}">
+        <span class="mood-name" lang="en">${esc(m.label)}</span>
+        ${showTe ? `<span class="mood-te" lang="te">${esc(m.labelTe)}</span>` : ''}
+        <span class="mood-text" lang="${telugu ? 'te' : 'en'}">“${esc(telugu ? m.textTe : m.text)}”</span>
+        <span class="mood-ref"${telugu ? ' lang="te"' : ''}>${esc(this.chapterLabel(m.book, m.chapter))}:${m.verse}</span>
       </button>`).join('');
   }
 
@@ -1881,7 +1973,7 @@ class ScripturaApp {
       this.renderContinueCard();
       pwa.showToast(added ? `Restored ${added} ${added === 1 ? 'item' : 'items'} from the backup` : 'Everything in that backup is already here');
     } catch {
-      pwa.showToast('That file isn’t a Scriptura backup.');
+      pwa.showToast('That file isn’t a backup from this app.');
     }
   }
 
@@ -2016,25 +2108,101 @@ class ScripturaApp {
   }
 
   // =====================================================================
-  // Settings: storage
+  // Permission to save on this device
   // =====================================================================
-  updateStorageNote() {
-    const { count, bytes } = BibleSource.stats();
-    const size = bytes > 1024 * 1024 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
-    const books = BibleSource.booksOnDevice('kjv') + BibleSource.booksOnDevice('tel');
-    const parts = [];
-    if (books) parts.push(`${books} ${books === 1 ? 'book' : 'books'} of the KJV and Telugu Bibles`);
-    if (count) parts.push(`${count} ${count === 1 ? 'chapter' : 'chapters'} from other translations (${size})`);
-    setText('storage-note', parts.length
-      ? `Saved for offline reading: ${parts.join(' and ')}.`
-      : 'Books and chapters you open are kept here for offline reading.');
-    $('btn-clear-cache').disabled = !count && !books;
+  onSaveAttempt(state) {
+    if (state === 'unknown') {
+      // Ask after the sheet the reader is working in closes, so the question never covers their work
+      if (this.openSheet) {
+        if (this.openSheet.id !== 'consent-sheet') this.consentPending = true;
+      } else {
+        this.openConsent();
+      }
+      return;
+    }
+    // Said "Not now" earlier in this visit: a quiet reminder, at most every half minute
+    if (Date.now() - (this.consentToastAt || 0) < 30000) return;
+    this.consentToastAt = Date.now();
+    pwa.showToast('Not saved on this device. It lasts until you close the app.', 'info', {
+      actionLabel: 'Allow saving',
+      onAction: () => this.allowSaving()
+    });
+  }
+
+  openConsent() {
+    this.consentPending = false;
+    if (Consent.state() !== 'unknown') return;
+    this.consentAnswered = false;
+    this.openDrawer('consent-sheet');
+  }
+
+  allowSaving() {
+    this.consentAnswered = true;
+    this.consentPending = false;
+    if (!Consent.grant()) {
+      pwa.showToast('This browser is blocking storage, so nothing can be saved.');
+      return;
+    }
+    this.closeSheet($('consent-sheet'));
+    this.updateDataRow();
+    pwa.showToast('Saving on this device. Your highlights, notes and settings will be here next time.', 'success');
+  }
+
+  declineSaving() {
+    this.consentAnswered = true;
+    this.consentPending = false;
+    Consent.decline();
+    this.closeSheet($('consent-sheet'));
+    this.updateDataRow();
+  }
+
+  // Settings: allow saving, or (after a second tap) delete everything and stop
+  toggleSaving() {
+    const btn = $('btn-data-toggle');
+    if (!Consent.allowed()) {
+      this.allowSaving();
+      return;
+    }
+    if (btn.dataset.confirm !== 'yes') {
+      btn.dataset.confirm = 'yes';
+      btn.textContent = 'Delete and turn off';
+      btn.classList.add('btn-danger');
+      return;
+    }
+    Consent.revoke();
+    this.updateDataRow();
+    pwa.showToast('Saved data deleted from this device. Nothing new will be saved.');
+  }
+
+  updateDataRow() {
+    const on = Consent.allowed();
+    const earlier = !on && Consent.hasStoredData();
+    setText('data-note', on
+      ? 'Highlights, bookmarks, notes, settings and your streak are saved in this browser.'
+      : earlier
+        ? 'Not saving new changes. Data from an earlier visit is still in this browser.'
+        : 'Not saving. Changes last until you close the app.');
+    const btn = $('btn-data-toggle');
+    btn.textContent = on ? 'Turn off' : 'Allow';
+    btn.dataset.confirm = '';
+    btn.classList.remove('btn-danger');
+    $('btn-data-delete').classList.toggle('hidden', !earlier);
   }
 
   // =====================================================================
   // Sheets
   // =====================================================================
   setupSheets() {
+    // Older iPhones (Safari before 15.4) have no <dialog>: open the sheets by attribute over a scrim of our own
+    this.nativeSheets = typeof HTMLDialogElement === 'function' && typeof HTMLDialogElement.prototype.showModal === 'function';
+    if (!this.nativeSheets) {
+      document.documentElement.classList.add('sheet-fallback');
+      const scrim = document.createElement('div');
+      scrim.className = 'sheet-scrim';
+      scrim.addEventListener('click', () => this.closeAllDrawers());
+      document.body.appendChild(scrim);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && this.openSheet) this.closeSheet(this.openSheet); });
+    }
     document.querySelectorAll('dialog.sheet').forEach(sheet => {
       // Escape: animate out instead of the instant native close
       sheet.addEventListener('cancel', (e) => {
@@ -2055,7 +2223,10 @@ class ScripturaApp {
     if (!sheet) return;
     if (this.openSheet && this.openSheet !== sheet) this.closeSheet(this.openSheet, { immediate: true, restoreFocus: false });
     else if (!this.openSheet) this.lastFocus = document.activeElement;
-    if (!sheet.open) sheet.showModal();
+    if (!sheet.hasAttribute('open')) {
+      if (this.nativeSheets) sheet.showModal();
+      else sheet.setAttribute('open', '');
+    }
     this.openSheet = sheet;
     document.documentElement.classList.add('has-sheet');
     document.body.classList.remove('chrome-hidden');
@@ -2064,7 +2235,7 @@ class ScripturaApp {
   }
 
   closeSheet(sheet, { immediate = false, restoreFocus = true } = {}) {
-    if (!sheet || !sheet.open) return;
+    if (!sheet || !sheet.hasAttribute('open')) return;
     sheet.classList.remove('is-open', 'is-dragging');
     sheet.style.transform = '';
     if (this.openSheet === sheet) {
@@ -2073,8 +2244,11 @@ class ScripturaApp {
     }
     const finish = () => {
       if (sheet.classList.contains('is-open')) return; // reopened meanwhile
-      sheet.close();
+      if (this.nativeSheets) sheet.close();
+      else sheet.removeAttribute('open');
       if (restoreFocus && !this.openSheet && this.lastFocus?.isConnected) this.lastFocus.focus({ preventScroll: true });
+      if (sheet.id === 'consent-sheet' && !this.consentAnswered) this.declineSaving();
+      if (this.consentPending && !this.openSheet) setTimeout(() => this.openConsent(), 120);
     };
     if (immediate || reduceMotion()) {
       finish();

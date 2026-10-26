@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-  <title>Scriptura — Bible reader</title>
-  <meta name="description" content="A quiet Bible reader: the whole King James Bible and three other public-domain translations, chapters saved for offline reading, highlights and notes kept on your device, a daily verse and background music.">
+  <title>The Bible</title>
+  <meta name="description" content="A quiet Bible reader: the whole King James Bible and three other public-domain translations, chapters saved for offline reading, highlights and notes kept on your device, a daily verse and cross references.">
 
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
@@ -13,11 +13,11 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Scriptura">
+  <meta name="apple-mobile-web-app-title" content="The Bible">
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
 
-  <meta property="og:title" content="Scriptura — Bible reader">
+  <meta property="og:title" content="The Bible">
   <meta property="og:description" content="Read the whole Bible with careful typography, offline chapters, highlights, notes and a daily verse.">
   <meta property="og:image" content="icons/icon-512.png">
   <meta property="og:type" content="website">
@@ -33,9 +33,9 @@
     (function () {
       try {
         var p = JSON.parse(localStorage.getItem('scriptura_preferences') || '{}');
-        var t = p.theme || 'auto';
+        var t = { 'theme-olive': 'theme-parchment', 'theme-obsidian': 'theme-cathedral' }[p.theme] || p.theme || 'auto';
         if (t === 'auto') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-cathedral' : 'theme-parchment';
-        document.documentElement.className = t + ' ' + (p.fontFamily || 'font-serif');
+        document.documentElement.className = t + ' font-serif';
       } catch (e) {}
     })();
   </script>
@@ -52,12 +52,9 @@
   <svg class="sprite" aria-hidden="true" focusable="false">
     <symbol id="i-read" viewBox="0 0 24 24"><path d="M12 6.6C10.2 5.3 7.7 4.6 4.5 4.6v13.1c3.2 0 5.7.7 7.5 2 1.8-1.3 4.3-2 7.5-2V4.6c-3.2 0-5.7.7-7.5 2z"/><path d="M12 6.6v13.1"/></symbol>
     <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></symbol>
-    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
-    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/><rect x="13.9" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/></symbol>
     <symbol id="i-today" viewBox="0 0 24 24"><path d="M3 18.5h18"/><path d="M7 18.5a5 5 0 0 1 10 0"/><path d="M12 5.5v3"/><path d="M5.3 9.8l1.9 1.9"/><path d="M18.7 9.8l-1.9 1.9"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.2"/><path d="M15.2 15.2 20 20"/></symbol>
     <symbol id="i-library" viewBox="0 0 24 24"><rect x="3.5" y="5" width="3.6" height="14.5" rx=".9"/><rect x="8.4" y="5" width="3.6" height="14.5" rx=".9"/><path d="M13.4 6.6l3.4-.95 3.7 13.6-3.4.95z"/></symbol>
-    <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M4 9.6h3.3L11.6 6v12l-4.3-3.6H4z"/><path d="M15.3 9.2a4 4 0 0 1 0 5.6"/><path d="M18.1 6.6a7.6 7.6 0 0 1 0 10.8"/></symbol>
     <symbol id="i-chev-left" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
     <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
     <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="M6.5 9.5l5.5 5.5 5.5-5.5"/></symbol>
@@ -67,6 +64,7 @@
     <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 3.8h10a1 1 0 0 1 1 1v15.4l-6-4.3-6 4.3V4.8a1 1 0 0 1 1-1z"/></symbol>
     <symbol id="i-note" viewBox="0 0 24 24"><path d="M4.5 19.5v-3.3L16 4.7a1.9 1.9 0 0 1 2.7 0l.6.6a1.9 1.9 0 0 1 0 2.7L7.8 19.5z"/><path d="M14 6.7l3.3 3.3"/></symbol>
     <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3.8v11"/><path d="M8.2 7.6 12 3.8l3.8 3.8"/><path d="M6.5 11.5v7a1.5 1.5 0 0 0 1.5 1.5h8a1.5 1.5 0 0 0 1.5-1.5v-7"/></symbol>
+    <symbol id="i-related" viewBox="0 0 24 24"><path d="M9.5 14.5l5-5"/><path d="M11 6.5l1.4-1.4a4 4 0 0 1 5.7 5.7L16.7 12.2"/><path d="M13 17.5l-1.4 1.4a4 4 0 0 1-5.7-5.7L7.3 11.8"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15"/><path d="M9.5 7V4.8h5V7"/><path d="M6.5 7l.9 12.2a1 1 0 0 0 1 .9h7.2a1 1 0 0 0 1-.9L17.5 7"/></symbol>
     <symbol id="i-none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><path d="M6.8 17.2 17.2 6.8"/></symbol>
@@ -85,9 +83,9 @@
 
     <!-- Desktop sidebar -->
     <aside class="rail" aria-label="Sidebar">
-      <button class="rail-brand pressable" data-tab="daily" aria-label="Scriptura, go home">
+      <button class="rail-brand pressable" data-tab="daily" aria-label="The Bible, go home">
         <img src="icons/favicon.svg" alt="" width="30" height="30">
-        <span class="wordmark">Scriptura</span>
+        <span class="wordmark">The Bible</span>
       </button>
 
       <nav class="rail-nav" aria-label="Primary">
@@ -123,16 +121,6 @@
           <li><button class="passage-link pressable" data-goto="Isaiah|40"><span class="pl-ref">Isaiah 40</span><span class="pl-title">Wings as eagles</span></button></li>
         </ul>
       </section>
-
-      <div class="rail-foot">
-        <label class="switch-row switch-row--compact">
-          <span class="switch-copy">
-            <span class="switch-title">Background music</span>
-            <span class="switch-sub">Organ, rain, bells…</span>
-          </span>
-          <input type="checkbox" class="switch" data-pref="ambient" role="switch">
-        </label>
-      </div>
     </aside>
 
     <div class="main-col">
@@ -155,7 +143,7 @@
             <button class="icon-btn pressable" id="btn-appearance" aria-haspopup="dialog" aria-label="Reading settings">
               <span class="aa-glyph" aria-hidden="true">Aa</span>
             </button>
-            <button class="icon-btn pressable pwa-install-btn hidden" aria-label="Install Scriptura">
+            <button class="icon-btn pressable pwa-install-btn hidden" aria-label="Install The Bible">
               <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
             </button>
           </div>
@@ -197,13 +185,7 @@
           <div class="home-grid">
             <!-- Verse of the day -->
             <section class="home-verse" aria-label="Verse of the day">
-              <figure class="today-art bezel">
-                <picture>
-                  <source type="image/webp" srcset="assets/daily_banner-800.webp 800w, assets/daily_banner.webp 1376w" sizes="(min-width: 1100px) 640px, 100vw">
-                  <img src="assets/daily_banner.jpg" alt="Morning light through stone arches beside an olive grove" width="1376" height="768" decoding="async">
-                </picture>
-                <figcaption class="today-theme" id="daily-tag">Divine peace</figcaption>
-              </figure>
+              <p class="today-theme" id="daily-tag">Divine peace</p>
               <blockquote class="today-verse">
                 <p id="daily-quote"></p>
                 <footer><cite id="daily-ref"></cite></footer>
@@ -246,46 +228,14 @@
               </button>
             </nav>
 
-            <!-- Well-loved passages -->
+            <!-- A verse for how you feel -->
             <section class="home-passages" aria-labelledby="passages-title">
-              <h2 class="section-title" id="passages-title">Well-loved passages</h2>
+              <h2 class="section-title" id="passages-title">How are you feeling?</h2>
               <div class="passage-strip" id="passage-strip"></div>
             </section>
 
             <div class="home-col">
-              <!-- Music -->
-              <section class="home-music bezel" aria-labelledby="music-title">
-                <div class="music-core bezel-core">
-                  <div class="music-head">
-                    <div class="music-copy">
-                      <p class="music-label">Music for quiet time</p>
-                      <h2 class="music-title" id="music-title">Cathedral organ</h2>
-                      <p class="music-sub" id="music-sub">Made on this device · keeps playing while you read</p>
-                    </div>
-                    <button class="music-play pressable" id="music-play" aria-pressed="false" aria-label="Play music">
-                      <svg class="icon icon-play" aria-hidden="true"><use href="#i-play"/></svg>
-                      <svg class="icon icon-pause" aria-hidden="true"><use href="#i-pause"/></svg>
-                    </button>
-                  </div>
-                  <div class="music-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-                  <div class="music-kinds" role="radiogroup" aria-label="Soundscape" id="music-kinds"></div>
-                  <div class="music-row">
-                    <label class="music-volume">
-                      <svg class="icon icon-sm" aria-hidden="true"><use href="#i-speaker"/></svg>
-                      <span class="visually-hidden">Volume</span>
-                      <input type="range" id="music-volume" min="0" max="100" step="1" value="35">
-                    </label>
-                    <div class="music-timer" role="radiogroup" aria-label="Stop music after" id="music-timer">
-                      <button class="timer-chip pressable" role="radio" aria-checked="true" data-minutes="0" aria-label="No timer">∞</button>
-                      <button class="timer-chip pressable" role="radio" aria-checked="false" data-minutes="15" aria-label="Stop after 15 minutes">15m</button>
-                      <button class="timer-chip pressable" role="radio" aria-checked="false" data-minutes="30" aria-label="Stop after 30 minutes">30m</button>
-                      <button class="timer-chip pressable" role="radio" aria-checked="false" data-minutes="60" aria-label="Stop after 1 hour">1h</button>
-                    </div>
-                  </div>
-                </div>
-              </section>
-  
-                <!-- Reflection and prayer -->
+              <!-- Reflection and prayer -->
               <section class="home-reflect" aria-label="Reflection and prayer">
                 <div class="reflect-block">
                   <h2 class="section-title" id="reflection-title">Reflection</h2>
@@ -409,6 +359,10 @@
       <button id="btn-action-note" class="vt-btn pressable">
         <svg class="icon" aria-hidden="true"><use href="#i-note"/></svg><span>Note</span>
       </button>
+      <button id="btn-action-related" class="vt-btn pressable">
+        <svg class="icon" aria-hidden="true"><use href="#i-related"/></svg><span>Related</span>
+        <b class="vt-badge" id="vt-related-count" hidden></b>
+      </button>
       <button id="btn-action-copy" class="vt-btn pressable">
         <svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy</span>
       </button>
@@ -420,6 +374,54 @@
       </button>
     </div>
   </div>
+
+  <!-- After following a cross reference: one tap back to the verse it came from -->
+  <div class="xref-return" id="xref-return" hidden>
+    <button class="xref-back pressable" id="xref-back">
+      <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chev-left"/></svg>
+      <span id="xref-back-label">Back</span>
+    </button>
+    <button class="xref-dismiss pressable" id="xref-dismiss" aria-label="Hide">
+      <svg class="icon icon-sm" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+  </div>
+
+  <!-- Sheet: cross references -->
+  <dialog id="xref-sheet" class="sheet sheet--tall" aria-labelledby="xref-title">
+    <div class="sheet-grip" data-sheet-grip>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="xref-title">Related verses</h2>
+        <button class="icon-btn pressable sheet-close-btn" aria-label="Close">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="sheet-body" id="xref-body"></div>
+  </dialog>
+
+  <!-- Sheet: permission to save on this device -->
+  <dialog id="consent-sheet" class="sheet" aria-labelledby="consent-title" aria-describedby="consent-lead">
+    <div class="sheet-grip" data-sheet-grip>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="consent-title">Save on this device?</h2>
+      </div>
+    </div>
+    <div class="sheet-body">
+      <p class="consent-lead" id="consent-lead">To keep your highlights, bookmarks, notes, settings and reading streak after you close the app, The Bible needs to store them in this browser.</p>
+      <ul class="consent-points">
+        <li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-check"/></svg>Stays in this browser on this device. Nothing is sent to a server.</li>
+        <li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-check"/></svg>No tracking or advertising cookies, and no account.</li>
+        <li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-check"/></svg>You can turn it off and delete everything in Settings at any time.</li>
+      </ul>
+      <div class="consent-actions">
+        <button class="btn btn-primary pressable" id="consent-allow">Allow saving</button>
+        <button class="btn btn-secondary pressable" id="consent-later">Not now</button>
+      </div>
+      <p class="consent-note">With “Not now”, what you just did lasts until you close the app.</p>
+    </div>
+  </dialog>
 
   <!-- Sheet: book and chapter picker -->
   <dialog id="picker-sheet" class="sheet sheet--tall" aria-labelledby="picker-title">
@@ -442,7 +444,7 @@
             <button class="chip pressable is-active" data-filter="ALL" aria-pressed="true">All</button>
             <button class="chip pressable" data-filter="OT" aria-pressed="false">Old Testament</button>
             <button class="chip pressable" data-filter="NT" aria-pressed="false">New Testament</button>
-            <button class="chip pressable" data-filter="SAVED" aria-pressed="false">On this device</button>
+            <button class="chip pressable" data-filter="STARTED" aria-pressed="false">Started</button>
             <button class="chip pressable" data-filter="POETRY" aria-pressed="false">Poetry &amp; wisdom</button>
             <button class="chip pressable" data-filter="GOSPELS" aria-pressed="false">Gospels</button>
           </div>
@@ -451,7 +453,6 @@
       </div>
       <div class="picker-pane" data-pane="chapters">
         <p class="picker-legend" id="picker-legend">
-          <span><i class="legend-dot is-saved"></i>On this device</span>
           <span><i class="legend-dot is-read"></i>Read</span>
         </p>
         <div id="chapter-matrix" class="chapter-grid"></div>
@@ -475,20 +476,9 @@
         <h3 class="setting-label" id="theme-label">Theme</h3>
         <div class="theme-grid" role="radiogroup" aria-labelledby="theme-label">
           <button class="theme-btn pressable" role="radio" aria-checked="false" data-theme="auto"><span class="theme-swatch swatch-auto" aria-hidden="true">Aa</span><span>Auto</span></button>
-          <button class="theme-btn pressable" role="radio" aria-checked="false" data-theme="theme-parchment"><span class="theme-swatch swatch-parchment" aria-hidden="true">Aa</span><span>Daylight</span></button>
-          <button class="theme-btn pressable" role="radio" aria-checked="false" data-theme="theme-sepia"><span class="theme-swatch swatch-sepia" aria-hidden="true">Aa</span><span>Vellum</span></button>
-          <button class="theme-btn pressable" role="radio" aria-checked="false" data-theme="theme-olive"><span class="theme-swatch swatch-olive" aria-hidden="true">Aa</span><span>Olive</span></button>
-          <button class="theme-btn pressable" role="radio" aria-checked="false" data-theme="theme-cathedral"><span class="theme-swatch swatch-cathedral" aria-hidden="true">Aa</span><span>Night</span></button>
-          <button class="theme-btn pressable" role="radio" aria-checked="false" data-theme="theme-obsidian"><span class="theme-swatch swatch-obsidian" aria-hidden="true">Aa</span><span>Midnight</span></button>
-        </div>
-      </section>
-
-      <section class="setting">
-        <h3 class="setting-label" id="font-label">Typeface</h3>
-        <div class="segmented" role="radiogroup" aria-labelledby="font-label">
-          <button class="segment font-btn pressable" role="radio" aria-checked="false" data-font="font-serif"><span class="font-sample sample-text">Literata</span></button>
-          <button class="segment font-btn pressable" role="radio" aria-checked="false" data-font="font-classic"><span class="font-sample sample-classic">Garamond</span></button>
-          <button class="segment font-btn pressable" role="radio" aria-checked="false" data-font="font-sans"><span class="font-sample sample-legible">Legible</span></button>
+          <button class="theme-btn pressable" role="radio" aria-checked="false" data-theme="theme-parchment"><span class="theme-swatch swatch-parchment" aria-hidden="true">Aa</span><span>Light</span></button>
+          <button class="theme-btn pressable" role="radio" aria-checked="false" data-theme="theme-sepia"><span class="theme-swatch swatch-sepia" aria-hidden="true">Aa</span><span>Sepia</span></button>
+          <button class="theme-btn pressable" role="radio" aria-checked="false" data-theme="theme-cathedral"><span class="theme-swatch swatch-cathedral" aria-hidden="true">Aa</span><span>Dark</span></button>
         </div>
       </section>
 
@@ -502,16 +492,6 @@
           <input type="range" id="input-font-size" min="16" max="28" step="1" value="20" aria-labelledby="size-label">
           <button class="icon-btn pressable" id="btn-size-up" aria-label="Larger text"><span class="size-a size-a--lg" aria-hidden="true">A</span></button>
         </div>
-        <p class="type-preview">In the beginning was the Word, and the Word was with God, and the Word was God.</p>
-      </section>
-
-      <section class="setting">
-        <h3 class="setting-label" id="leading-label">Line spacing</h3>
-        <div class="segmented" role="radiogroup" aria-labelledby="leading-label">
-          <button class="segment leading-btn pressable" role="radio" aria-checked="false" data-leading="1.55">Compact</button>
-          <button class="segment leading-btn pressable" role="radio" aria-checked="false" data-leading="1.75">Comfortable</button>
-          <button class="segment leading-btn pressable" role="radio" aria-checked="false" data-leading="1.95">Airy</button>
-        </div>
       </section>
 
       <section class="setting">
@@ -524,23 +504,9 @@
         <label class="switch-row">
           <span class="switch-copy">
             <span class="switch-title">Telugu and English together</span>
-            <span class="switch-sub">Shows the other language under each verse · తెలుగు + KJV</span>
+            <span class="switch-sub">Shows the other language under each verse</span>
           </span>
           <input type="checkbox" class="switch" id="check-parallel" role="switch">
-        </label>
-        <label class="switch-row">
-          <span class="switch-copy">
-            <span class="switch-title">Words of Jesus in red</span>
-            <span class="switch-sub">In the Gospel chapters that carry red-letter marks</span>
-          </span>
-          <input type="checkbox" class="switch" id="check-red-letters" role="switch">
-        </label>
-        <label class="switch-row">
-          <span class="switch-copy">
-            <span class="switch-title">Background music</span>
-            <span class="switch-sub">Soundscapes made on this device; choose one on Home</span>
-          </span>
-          <input type="checkbox" class="switch" data-pref="ambient" role="switch">
         </label>
       </section>
 
@@ -552,18 +518,25 @@
           </div>
           <button class="btn btn-secondary btn-sm pressable" id="btn-download-bible">Download</button>
         </div>
-        <div class="setting-row">
+      </section>
+
+      <section class="setting setting--storage">
+        <div class="setting-row" id="data-row">
           <div>
-            <h3 class="setting-label setting-label--flush">Downloads</h3>
-            <p class="setting-note" id="storage-note">Books and chapters you open are kept here for offline reading.</p>
+            <h3 class="setting-label setting-label--flush">Your data</h3>
+            <p class="setting-note" id="data-note"></p>
           </div>
-          <button class="btn btn-quiet btn-sm pressable" id="btn-clear-cache">Clear</button>
+          <div class="data-actions">
+            <button class="btn btn-quiet btn-sm pressable hidden" id="btn-data-delete">Delete</button>
+            <button class="btn btn-secondary btn-sm pressable" id="btn-data-toggle">Allow</button>
+          </div>
         </div>
+        <p class="setting-note data-policy">Kept only in this browser and never sent anywhere. No tracking or advertising cookies.</p>
       </section>
 
       <button class="btn btn-secondary btn-block pressable pwa-install-btn hidden" id="settings-install">
         <svg class="icon icon-sm" aria-hidden="true"><use href="#i-download"/></svg>
-        <span>Install Scriptura</span>
+        <span>Install The Bible</span>
       </button>
     </div>
   </dialog>
@@ -609,7 +582,7 @@
           <svg class="vc-mark" aria-hidden="true"><use href="#i-cross"/></svg>
           <blockquote class="vc-text" id="card-preview-text"></blockquote>
           <figcaption class="vc-ref" id="card-preview-ref"></figcaption>
-          <span class="vc-brand">Scriptura</span>
+          <span class="vc-brand">The Bible</span>
         </figure>
       </div>
       <div class="card-styles" role="radiogroup" aria-label="Card style">
