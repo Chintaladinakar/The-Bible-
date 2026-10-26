@@ -1808,7 +1808,6 @@ html.is-ready [data-dir="back"] .picker-pane.is-active { animation-name: pane-ba
 @media (max-width: 767px) {
   .chapter-head { margin-top: var(--s-6); }
   .sheet-actions { grid-template-columns: 1fr 1fr; }
-  .sheet-actions .btn-primary { grid-column: 1 / -1; }
 }
 
 @media (max-width: 559px) {

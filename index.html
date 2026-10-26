@@ -69,7 +69,6 @@
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15"/><path d="M9.5 7V4.8h5V7"/><path d="M6.5 7l.9 12.2a1 1 0 0 0 1 .9h7.2a1 1 0 0 0 1-.9L17.5 7"/></symbol>
     <symbol id="i-none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><path d="M6.8 17.2 17.2 6.8"/></symbol>
     <symbol id="i-highlight" viewBox="0 0 24 24"><path d="M14.5 4.5l5 5-8.2 8.2H6.3v-5z"/><path d="M4 20.5h16"/></symbol>
-    <symbol id="i-image" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M20 15.5l-4.5-4.5L8 18.5"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19.5h14"/></symbol>
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/><path d="M5 19.5h14"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/></symbol>
@@ -595,14 +594,11 @@
         <button class="card-style pressable" role="radio" aria-checked="false" data-card-style="olive"><span class="cs-dot cs-olive" aria-hidden="true"></span>Olive</button>
       </div>
       <div class="sheet-actions">
+        <button class="btn btn-primary pressable" id="btn-card-share">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-share"/></svg><span>Share card</span>
+        </button>
         <button class="btn btn-secondary pressable" id="btn-card-copy">
           <svg class="icon icon-sm" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy text</span>
-        </button>
-        <button class="btn btn-secondary pressable" id="btn-card-image">
-          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-image"/></svg><span>Save image</span>
-        </button>
-        <button class="btn btn-primary pressable" id="btn-card-share">
-          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-share"/></svg><span>Share</span>
         </button>
       </div>
     </div>

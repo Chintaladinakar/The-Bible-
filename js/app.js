@@ -38,7 +38,6 @@ const MEMORIZE_LEVELS = [
 
 const mobileLayout = window.matchMedia('(max-width: 1023px)');
 const sheetLayout = window.matchMedia('(max-width: 767px)');
-const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
 const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 const sameVerse = (x, book, chapter, verseNum) => x.book === book && x.chapter === chapter && x.verseNum === verseNum;
@@ -97,6 +96,8 @@ class ScripturaApp {
 
     this.bindEvents();
     this.setupSheets();
+    // Once the reader scrolls on their own, stop steering the page back to a verse they jumped to
+    ['wheel', 'touchstart', 'keydown'].forEach(type => window.addEventListener(type, () => { this.revealTarget = null; }, { passive: true }));
     this.setupScrollChrome();
     this.setupReadTracking();
 
@@ -412,8 +413,7 @@ class ScripturaApp {
 
     // Share sheet
     $('btn-card-copy').addEventListener('click', () => this.copyShareText());
-    $('btn-card-share').addEventListener('click', () => this.shareVerseText());
-    $('btn-card-image').addEventListener('click', () => this.saveCardImage());
+    $('btn-card-share').addEventListener('click', () => this.shareCard());
     document.querySelectorAll('.card-style').forEach(btn => btn.addEventListener('click', () => this.setCardStyle(btn.dataset.cardStyle)));
 
     // Memorize sheet
@@ -769,6 +769,10 @@ class ScripturaApp {
       .then(() => {
         if (this.chapter.book !== book || this.chapter.ch !== ch || !this.hasText()) return;
         $('reading-content').innerHTML = this.versesHTML();
+        // The added lines push the text down: bring back a verse that was just jumped to
+        const target = this.revealTarget;
+        const age = target ? Date.now() - target.at : Infinity;
+        if (target && target.book === book.name && target.ch === ch && age < 4000) this.revealVerse(target.num, { flash: age < 1500 });
       })
       .catch(() => { /* the main text still reads fine on its own */ });
   }
@@ -1031,6 +1035,7 @@ class ScripturaApp {
   revealVerse(num, { flash = true } = {}) {
     const el = document.querySelector(`#reading-content .verse[data-verse="${num}"]`);
     if (!el) return;
+    this.revealTarget = { book: this.currentBook, ch: this.currentChapter, num, at: Date.now() };
     el.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
     if (!flash) return;
     el.classList.remove('is-flash');
@@ -1338,7 +1343,6 @@ class ScripturaApp {
     setText('card-preview-text', `“${text}”`);
     $('card-preview-text').lang = TELUGU_TEXT.test(text) ? 'te' : 'en';
     setText('card-preview-ref', reference);
-    $('btn-card-share').classList.toggle('hidden', !navigator.share);
     this.setCardStyle(this.cardStyle);
     this.openDrawer('card-drawer');
   }
@@ -1347,6 +1351,26 @@ class ScripturaApp {
     this.cardStyle = style;
     $('verse-card').dataset.style = style;
     document.querySelectorAll('.card-style').forEach(btn => btn.setAttribute('aria-checked', String(btn.dataset.cardStyle === style)));
+    this.prepareCard();
+  }
+
+  // iPhone Safari only opens the share sheet straight from a tap, with no waiting in between,
+  // so the picture is drawn ahead of time: when the sheet opens and whenever the style changes
+  prepareCard() {
+    const target = this.shareTarget;
+    const style = this.cardStyle;
+    if (!target) return;
+    this.cardFile = null;
+    const btn = $('btn-card-share');
+    btn.disabled = true;
+    renderVerseCard({ text: target.text, reference: target.reference, style })
+      .then(blob => {
+        if (this.shareTarget !== target || this.cardStyle !== style) return;
+        const slug = target.reference.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        this.cardFile = new File([blob], `${slug.length > 3 ? slug : 'verse'}.png`, { type: 'image/png' });
+      })
+      .catch(() => { /* shareCard explains it */ })
+      .finally(() => { if (this.shareTarget === target) btn.disabled = false; });
   }
 
   async copyShareText() {
@@ -1357,42 +1381,35 @@ class ScripturaApp {
     if (ok) this.closeAllDrawers();
   }
 
-  async shareVerseText() {
-    if (!this.shareTarget) return;
-    const { text, reference } = this.shareTarget;
-    try {
-      await navigator.share({ title: reference, text: `“${text}” — ${reference}` });
-      this.closeAllDrawers();
-    } catch (err) {
-      if (err.name !== 'AbortError') this.copyShareText();
+  // Sends the card picture to the share sheet; nothing is awaited before navigator.share so iPhone allows it
+  shareCard() {
+    const file = this.cardFile;
+    if (!file) {
+      pwa.showToast('The card couldn’t be drawn on this device. Copy the text instead.');
+      return;
     }
+    if (navigator.canShare?.({ files: [file] })) {
+      navigator.share({ files: [file] })
+        .then(() => this.closeAllDrawers())
+        .catch(err => {
+          if (err.name !== 'AbortError') pwa.showToast('Sharing didn’t work here. Copy the text instead.');
+        });
+      return;
+    }
+    // Browsers that can't share images (some desktops): put the picture on the clipboard to paste into a chat
+    this.copyImage(file).then(ok => {
+      pwa.showToast(ok ? 'Card copied. Paste it into any chat or post.' : 'This browser can’t share pictures. Copy the text instead.');
+      if (ok) this.closeAllDrawers();
+    });
   }
 
-  async saveCardImage() {
-    if (!this.shareTarget) return;
-    const btn = $('btn-card-image');
-    btn.disabled = true;
+  async copyImage(file) {
     try {
-      const { text, reference } = this.shareTarget;
-      const blob = await renderVerseCard({ text, reference, style: this.cardStyle });
-      const slug = reference.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      const name = `${slug.length > 3 ? slug : 'scriptura-verse'}.png`;
-      const file = new File([blob], name, { type: 'image/png' });
-      // Phones get the share sheet (Save Image lives there); desktops get a download
-      if (!finePointer.matches && navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: reference });
-          return;
-        } catch (err) {
-          if (err.name === 'AbortError') return;
-        }
-      }
-      this.downloadBlob(blob, name);
-      pwa.showToast('Image saved to your downloads');
+      if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') return false;
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': file })]);
+      return true;
     } catch {
-      pwa.showToast('The image couldn’t be created on this device.');
-    } finally {
-      btn.disabled = false;
+      return false;
     }
   }
 
