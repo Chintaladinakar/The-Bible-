@@ -1,0 +1,21 @@
+# Agent skills and tooling (not part of the site)
+.agents/
+.claude/
+agent/
+skills-lock.json
+
+# Source archives (the converted Bibles live in bibles/)
+*.zip
+
+# Local backups
+.backup/
+
+# Original icon art the site no longer uses (it serves the PNG and SVG icons)
+icons/icon.jpg
+icons/icon-192.jpg
+icons/icon-512.jpg
+
+# System files
+node_modules/
+.DS_Store
+Thumbs.db

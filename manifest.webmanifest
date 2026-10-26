@@ -1,0 +1,43 @@
+{
+  "name": "Scriptura — Bible reader",
+  "short_name": "Scriptura",
+  "description": "A quiet Bible reader: four public-domain translations, chapters saved for offline reading, highlights and notes kept on your device, a daily verse and background music.",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FBFAF7",
+  "theme_color": "#FBFAF7",
+  "categories": ["books", "lifestyle", "education"],
+  "icons": [
+    { "src": "./icons/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today’s verse",
+      "short_name": "Today",
+      "description": "The verse, reflection and prayer for today",
+      "url": "./index.html#home",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Psalm 23",
+      "short_name": "Psalm 23",
+      "description": "The Lord is my shepherd",
+      "url": "./index.html#book=Psalms&ch=23&open",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Search",
+      "short_name": "Search",
+      "description": "Search verses or jump to a reference",
+      "url": "./index.html#search&open",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

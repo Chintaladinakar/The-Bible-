@@ -1,0 +1,419 @@
+/* Scriptura v3 — platform layer: viewport, touch, safe areas, sheets and floating chrome */
+
+/* =====================================================================
+   BASELINE
+   ===================================================================== */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  /* Keep the native bounce, drop pull-to-refresh */
+  overscroll-behavior-y: contain;
+  scroll-padding-top: calc(var(--bar-h) + var(--bar-gap) + env(safe-area-inset-top, 0px) + 16px);
+  scroll-padding-bottom: calc(var(--tabbar-h) + 40px);
+}
+
+/* Lock the page behind an open sheet */
+html.has-sheet { overflow: hidden; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+button, a, label, [role="button"], [role="tab"], [role="radio"] {
+  touch-action: manipulation;
+}
+
+/* Controls are not content: no text selection or long-press callout */
+button, label.btn, [role="tab"], [role="radio"], .tab-bar, .chip, .sheet-grip, .verse-toolbar {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* iOS zooms into any field under 16px */
+input, textarea, select { font-size: 16px; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* Press feedback on pointer-down, for touch and mouse alike */
+.pressable {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+.pressable:active:not(:disabled) { transform: scale(0.97); }
+
+/* =====================================================================
+   SHEETS (native <dialog>: bottom sheet on phones, centred panel above 768px)
+   ===================================================================== */
+dialog.sheet {
+  --sheet-pad: 20px;
+  position: fixed;
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform var(--dur-slow) var(--ease-sheet);
+}
+dialog.sheet[open] { display: flex; flex-direction: column; }
+dialog.sheet.is-open { transform: translateY(0); }
+dialog.sheet.is-dragging { transition: none; }
+dialog.sheet--tall { height: min(88dvh, 860px); }
+
+dialog.sheet::backdrop {
+  background: rgba(28, 22, 12, 0.36);
+  background: var(--scrim, rgba(28, 22, 12, 0.36));
+  opacity: 0;
+  transition: opacity var(--dur-slow) ease;
+}
+dialog.sheet.is-open::backdrop { opacity: 1; }
+
+.sheet-grip { flex-shrink: 0; touch-action: none; }
+.sheet-handle {
+  width: 38px;
+  height: 5px;
+  margin: 8px auto 0;
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 56px;
+  padding: 0 8px 0 var(--sheet-pad);
+}
+.sheet-head:has(.picker-back:not(.hidden)) { padding-left: 6px; }
+.sheet-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-text);
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.sheet-head--compose {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  padding: 0 12px;
+}
+.sheet-head--compose .sheet-title { flex: none; text-align: center; }
+.sheet-head--compose .text-btn:first-child { justify-self: start; }
+.sheet-head--compose .text-btn:last-child { justify-self: end; }
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px var(--sheet-pad) calc(var(--sheet-pad) + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  dialog.sheet {
+    --sheet-pad: 24px;
+    inset: 0;
+    width: min(580px, calc(100vw - 48px));
+    height: fit-content;
+    max-height: min(780px, calc(100dvh - 64px));
+    margin: auto;
+    border-radius: var(--r-xl);
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+    transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+  }
+  dialog.sheet--tall { height: min(780px, calc(100dvh - 64px)); }
+  dialog.sheet.is-open { opacity: 1; transform: none; }
+  .sheet-handle { display: none; }
+  .sheet-head { min-height: 64px; padding-top: 4px; }
+  .sheet-body { padding-bottom: var(--sheet-pad); }
+}
+
+/* =====================================================================
+   FLOATING TAB BAR (phones and tablets)
+   ===================================================================== */
+.tab-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  z-index: var(--z-tabbar);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(400px, calc(100vw - 24px));
+  height: var(--tabbar-h);
+  padding: 6px;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(1.6) blur(22px);
+  backdrop-filter: saturate(1.6) blur(22px);
+  box-shadow: var(--shadow-md), inset 0 0 0 1px var(--glass-edge), 0 0 0 1px var(--line);
+  transform: translateX(-50%);
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-3);
+  font: 600 11px/1 var(--font-ui);
+  letter-spacing: 0.01em;
+}
+.tab .icon { width: 23px; height: 23px; }
+.tab.is-active { color: var(--accent-ink); }
+.tab.is-active .icon { fill: currentColor; fill-opacity: 0.16; }
+.tab-indicator {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc((100% - 12px) / 4);
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  box-shadow: 0 8px 18px -8px var(--accent-line), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transform: translateX(calc(var(--tab-index, 0) * 100%));
+  transition: transform var(--dur-slow) var(--ease-spring);
+}
+
+/* Immersive reading: chrome slides away while scrolling down */
+body.chrome-hidden .tab-bar,
+body.has-verse-toolbar .tab-bar {
+  transform: translate(-50%, calc(100% + 24px + env(safe-area-inset-bottom, 0px)));
+}
+
+/* =====================================================================
+   VERSE TOOLBAR
+   ===================================================================== */
+.verse-toolbar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  z-index: var(--z-toolbar);
+  width: min(460px, calc(100vw - 16px));
+  padding: 8px 8px 6px;
+  border-radius: 26px;
+  background: var(--raised);
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--line), var(--inner-light);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 24px);
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out), visibility 0s linear var(--dur-base);
+}
+.verse-toolbar.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition-delay: 0s;
+}
+.vt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 4px 10px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.vt-ref {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 600 14.5px var(--font-ui);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.hl-palette { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.hl-swatch {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sw, transparent);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+.hl-swatch[data-color="gold"] { --sw: var(--sw-gold); }
+.hl-swatch[data-color="rose"] { --sw: var(--sw-rose); }
+.hl-swatch[data-color="emerald"] { --sw: var(--sw-emerald); }
+.hl-swatch[data-color="sky"] { --sw: var(--sw-sky); }
+.hl-swatch[data-color="amethyst"] { --sw: var(--sw-amethyst); }
+.hl-swatch::before { content: ''; position: absolute; inset: -4px; }
+.hl-swatch[aria-pressed="true"]::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--sw);
+}
+.hl-clear {
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.vt-actions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding-top: 6px; }
+.vt-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 9px 0 7px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--ink-2);
+  font: 600 11.5px/1 var(--font-ui);
+}
+.vt-btn span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vt-btn .icon { width: 22px; height: 22px; }
+.vt-btn[aria-pressed="true"] { color: var(--accent); }
+.vt-btn[aria-pressed="true"] .icon { fill: currentColor; fill-opacity: 0.18; }
+
+/* =====================================================================
+   TOASTS
+   ===================================================================== */
+.toast-stack {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--tabbar-h) + 24px);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.scriptura-toast {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--canvas);
+  font: 500 14.5px/1.35 var(--font-ui);
+  box-shadow: var(--shadow-md);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.scriptura-toast.is-visible { opacity: 1; transform: none; }
+.scriptura-toast.has-action { padding-right: 8px; }
+.toast-action {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--toast-accent);
+  font: 650 14px var(--font-ui);
+}
+
+/* =====================================================================
+   BREAKPOINTS
+   ===================================================================== */
+@media (max-width: 1023px) {
+  body.chrome-hidden .top-bar { transform: translateY(calc(-100% - 20px)); }
+}
+
+@media (min-width: 1024px) {
+  .tab-bar { display: none; }
+  .verse-toolbar, .toast-stack { left: calc(50% + var(--rail-w) / 2); }
+  .verse-toolbar { bottom: 24px; }
+  .toast-stack { bottom: 28px; }
+}
+
+/* Very small phones: six labelled actions don't fit in one row, so use two */
+@media (max-width: 359px) {
+  .hl-palette { gap: 4px; }
+  .hl-swatch { width: 26px; height: 26px; }
+  .vt-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* =====================================================================
+   HOVER — only where a precise pointer can hover, so taps never stick
+   ===================================================================== */
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover { background: color-mix(in srgb, var(--accent) 86%, var(--ink)); }
+  .btn-secondary:hover { background: var(--surface); }
+  .btn-quiet:hover { background: var(--surface); color: var(--ink); }
+  .icon-btn:hover { background: var(--surface); color: var(--ink); }
+  .icon-btn[aria-pressed="true"]:hover { background: var(--accent-soft); color: var(--accent); }
+  .text-btn:hover { color: var(--ink); }
+  .text-btn--strong:hover { color: color-mix(in srgb, var(--accent) 80%, var(--ink)); }
+  .text-link:hover { text-decoration-color: var(--accent); }
+  .chip:hover, .color-chip:hover, .card-style:hover { border-color: var(--ink-3); color: var(--ink); }
+  .chip.is-active:hover, .color-chip[aria-pressed="true"]:hover { color: var(--canvas); }
+  .segment:hover { color: var(--ink); }
+  .rail-link:hover { background: color-mix(in srgb, var(--raised) 70%, transparent); color: var(--ink); }
+  .rail-brand:hover, .passage-link:hover { background: color-mix(in srgb, var(--raised) 70%, transparent); }
+  .location-btn:hover { background: var(--surface); }
+  .verse:hover .verse-ink { text-decoration-color: var(--line-strong); }
+  .verse.is-selected:hover .verse-ink { text-decoration-color: var(--accent); }
+  .cn-btn:hover, .book-btn:hover, .ch-btn:hover { background: color-mix(in srgb, var(--surface) 72%, var(--line-strong)); }
+  .book-btn.is-current:hover { background: var(--accent-soft); }
+  .ch-btn.is-current:hover { background: var(--accent); }
+  .suggest:hover { background: var(--raised); }
+  .result:hover .result-text, .result:hover .result-title, .offline-item:hover .oi-title, .lib-open:hover .lib-text { color: var(--ink); }
+  .plan-open:hover .pd-title { color: var(--accent); }
+  .plan-check:hover::before { box-shadow: inset 0 0 0 1.5px var(--accent); }
+  .vt-btn:hover { background: var(--surface); color: var(--ink); }
+  .vt-btn[aria-pressed="true"]:hover { color: var(--accent); }
+  .hl-swatch:hover { transform: scale(1.1); }
+  .tab:hover { color: var(--ink-2); }
+  .tab.is-active:hover { color: var(--accent-ink); }
+  .btn:hover .btn-orb, .goto-result:hover .btn-orb { transform: translate(2px, -1px) scale(1.06); }
+  .lib-remove:hover { color: var(--rubric); background: color-mix(in srgb, var(--rubric) 10%, transparent); }
+  .goto-result:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
+  .theme-btn:hover .theme-swatch { box-shadow: 0 0 0 2px var(--raised), 0 0 0 4px var(--line-strong); }
+  .theme-btn[aria-checked="true"]:hover .theme-swatch { box-shadow: 0 0 0 2px var(--raised), 0 0 0 4px var(--accent); }
+  .mem-blank:hover { border-bottom-color: var(--accent); }
+}
+
+/* =====================================================================
+   REDUCED MOTION
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pressable:active:not(:disabled) { transform: none; }
+}

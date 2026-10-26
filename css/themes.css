@@ -1,0 +1,296 @@
+/* Scriptura v3 — design tokens and reading palettes
+   Theme and typeface classes live on <html> so they apply before first paint.
+   Palette: navy ink and lapis on porcelain by day, gold on deep indigo by night. */
+
+:root {
+  /* Reader — updated from preferences in app.js */
+  --reader-font-size: 20px;
+  --reader-line-height: 1.75;
+  --reader-scale: 1;
+  --reader-font: var(--font-text);
+
+  /* Type: Fraunces for display, Literata for reading, Geist for interface */
+  --font-display: 'Fraunces', 'Noto Serif Telugu', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-text: 'Literata', 'Noto Serif Telugu', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-classic: 'EB Garamond', 'Noto Serif Telugu', Garamond, 'Palatino Linotype', Georgia, serif;
+  --font-legible: 'Atkinson Hyperlegible', 'Noto Serif Telugu', 'Segoe UI', system-ui, sans-serif;
+  --font-ui: 'Geist', 'Noto Serif Telugu', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Space (4px base) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --gutter: 20px;
+
+  /* Radius — concentric: inner = outer - bezel padding */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-xl: 30px;
+  --r-pill: 999px;
+  --bezel-pad: 5px;
+
+  /* Layers (dialogs use the top layer and need none) */
+  --z-rail: 20;
+  --z-bar: 30;
+  --z-tabbar: 40;
+  --z-toolbar: 50;
+  --z-toast: 70;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 380ms;
+
+  /* Chrome */
+  --bar-h: 52px;
+  --bar-gap: 10px;
+  --tabbar-h: 64px;
+  --rail-w: 272px;
+
+  /* Highlight swatches (solid, for the picker buttons) */
+  --sw-gold: #F0C543;
+  --sw-rose: #EE8A9C;
+  --sw-emerald: #5CBE8D;
+  --sw-sky: #6CA0F2;
+  --sw-amethyst: #A68CEC;
+
+  --grain-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.09 0 0 0 0 0.16 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.97 0 0 0 0 0.92 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (min-width: 640px) {
+  :root { --gutter: 32px; }
+}
+
+@media (min-width: 1024px) {
+  :root { --gutter: 48px; }
+}
+
+/* =====================================================================
+   DAYLIGHT — porcelain, navy ink, lapis accent, gold ornament (default light)
+   ===================================================================== */
+.theme-parchment {
+  color-scheme: light;
+  --canvas: #FBFAF7;
+  --surface: #F1F0EB;
+  --raised: #FFFFFF;
+  --ink: #151A30;
+  --ink-2: #3D4257;
+  --ink-3: #62677C;
+  --ink-4: #A9ACBA;
+  --line: rgba(21, 26, 48, 0.08);
+  --line-strong: rgba(21, 26, 48, 0.15);
+  --accent: #3343B0;
+  --accent-ink: #FFFFFF;
+  --accent-soft: rgba(51, 67, 176, 0.08);
+  --accent-line: rgba(51, 67, 176, 0.28);
+  --gilt: #B08226;
+  --gilt-soft: rgba(176, 130, 38, 0.12);
+  --toast-accent: #AEB9FF;
+  --rubric: #B4232C;
+
+  --hl-gold: rgba(244, 200, 67, 0.42);
+  --hl-rose: rgba(238, 138, 156, 0.30);
+  --hl-emerald: rgba(92, 190, 141, 0.28);
+  --hl-sky: rgba(108, 160, 242, 0.28);
+  --hl-amethyst: rgba(166, 140, 236, 0.28);
+
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.85);
+  --bezel: rgba(21, 26, 48, 0.035);
+  --scrim: rgba(12, 16, 32, 0.32);
+  --shadow-sm: 0 1px 2px rgba(21, 26, 48, 0.06), 0 1px 1px rgba(21, 26, 48, 0.03);
+  --shadow-md: 0 12px 32px -12px rgba(21, 26, 48, 0.20), 0 3px 8px -3px rgba(21, 26, 48, 0.07);
+  --shadow-lg: 0 32px 72px -20px rgba(21, 26, 48, 0.30), 0 8px 20px -8px rgba(21, 26, 48, 0.10);
+  --inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --grain: var(--grain-dark);
+  --grain-opacity: 0.03;
+  --art-filter: none;
+}
+
+/* =====================================================================
+   VELLUM — warm paper, sepia ink, deep teal accent
+   ===================================================================== */
+.theme-sepia {
+  color-scheme: light;
+  --canvas: #F5EEE1;
+  --surface: #EBE1CE;
+  --raised: #FCF8F0;
+  --ink: #2A2119;
+  --ink-2: #57493B;
+  --ink-3: #6E5F4B;
+  --ink-4: #AE9D83;
+  --line: rgba(60, 40, 15, 0.10);
+  --line-strong: rgba(60, 40, 15, 0.19);
+  --accent: #1C6168;
+  --accent-ink: #FFFFFF;
+  --accent-soft: rgba(28, 97, 104, 0.09);
+  --accent-line: rgba(28, 97, 104, 0.30);
+  --gilt: #A2731F;
+  --gilt-soft: rgba(162, 115, 31, 0.13);
+  --toast-accent: #8FD3D2;
+  --rubric: #A12B22;
+
+  --hl-gold: rgba(232, 184, 60, 0.42);
+  --hl-rose: rgba(226, 128, 136, 0.32);
+  --hl-emerald: rgba(102, 176, 128, 0.32);
+  --hl-sky: rgba(104, 156, 214, 0.32);
+  --hl-amethyst: rgba(160, 134, 214, 0.32);
+
+  --glass: rgba(250, 244, 233, 0.76);
+  --glass-edge: rgba(255, 252, 244, 0.7);
+  --bezel: rgba(60, 40, 15, 0.045);
+  --scrim: rgba(50, 34, 12, 0.32);
+  --shadow-sm: 0 1px 2px rgba(80, 52, 14, 0.08), 0 1px 1px rgba(80, 52, 14, 0.04);
+  --shadow-md: 0 12px 32px -12px rgba(80, 52, 14, 0.24), 0 3px 8px -3px rgba(80, 52, 14, 0.08);
+  --shadow-lg: 0 32px 72px -20px rgba(80, 52, 14, 0.32), 0 8px 20px -8px rgba(80, 52, 14, 0.12);
+  --inner-light: inset 0 1px 0 rgba(255, 252, 244, 0.8);
+  --grain: var(--grain-dark);
+  --grain-opacity: 0.07;
+  --art-filter: sepia(0.12);
+}
+
+/* =====================================================================
+   OLIVE — sage paper, olive-green accent (the garden by the still waters)
+   ===================================================================== */
+.theme-olive {
+  color-scheme: light;
+  --canvas: #F2F4EE;
+  --surface: #E5E9DE;
+  --raised: #FAFBF8;
+  --ink: #1B2219;
+  --ink-2: #45503F;
+  --ink-3: #5F6A58;
+  --ink-4: #A2AB98;
+  --line: rgba(27, 34, 25, 0.09);
+  --line-strong: rgba(27, 34, 25, 0.17);
+  --accent: #3B672B;
+  --accent-ink: #FFFFFF;
+  --accent-soft: rgba(59, 103, 43, 0.09);
+  --accent-line: rgba(59, 103, 43, 0.30);
+  --gilt: #A2852A;
+  --gilt-soft: rgba(162, 133, 42, 0.13);
+  --toast-accent: #B7DC9C;
+  --rubric: #A8322A;
+
+  --hl-gold: rgba(236, 194, 70, 0.42);
+  --hl-rose: rgba(230, 136, 146, 0.30);
+  --hl-emerald: rgba(110, 186, 120, 0.30);
+  --hl-sky: rgba(108, 160, 220, 0.30);
+  --hl-amethyst: rgba(164, 138, 220, 0.30);
+
+  --glass: rgba(248, 250, 244, 0.74);
+  --glass-edge: rgba(255, 255, 255, 0.75);
+  --bezel: rgba(27, 34, 25, 0.04);
+  --scrim: rgba(18, 26, 14, 0.32);
+  --shadow-sm: 0 1px 2px rgba(30, 44, 22, 0.07), 0 1px 1px rgba(30, 44, 22, 0.04);
+  --shadow-md: 0 12px 32px -12px rgba(30, 44, 22, 0.22), 0 3px 8px -3px rgba(30, 44, 22, 0.08);
+  --shadow-lg: 0 32px 72px -20px rgba(30, 44, 22, 0.30), 0 8px 20px -8px rgba(30, 44, 22, 0.10);
+  --inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --grain: var(--grain-dark);
+  --grain-opacity: 0.045;
+  --art-filter: saturate(0.92);
+}
+
+/* =====================================================================
+   NIGHT — deep indigo with lamplight gold (default dark)
+   ===================================================================== */
+.theme-cathedral {
+  color-scheme: dark;
+  --canvas: #0C1020;
+  --surface: #141A30;
+  --raised: #1B2240;
+  --ink: #EDEFF7;
+  --ink-2: #B8BDD4;
+  --ink-3: #8C92AF;
+  --ink-4: #4E5573;
+  --line: rgba(237, 239, 247, 0.08);
+  --line-strong: rgba(237, 239, 247, 0.15);
+  --accent: #E9C46F;
+  --accent-ink: #1A1405;
+  --accent-soft: rgba(233, 196, 111, 0.12);
+  --accent-line: rgba(233, 196, 111, 0.36);
+  --gilt: #E9C46F;
+  --gilt-soft: rgba(233, 196, 111, 0.14);
+  --toast-accent: #3343B0;
+  --rubric: #FF8E84;
+
+  --hl-gold: rgba(233, 196, 111, 0.28);
+  --hl-rose: rgba(255, 142, 160, 0.26);
+  --hl-emerald: rgba(102, 210, 150, 0.24);
+  --hl-sky: rgba(120, 170, 255, 0.28);
+  --hl-amethyst: rgba(176, 150, 255, 0.28);
+
+  --glass: rgba(24, 30, 54, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.08);
+  --bezel: rgba(255, 255, 255, 0.04);
+  --scrim: rgba(3, 5, 14, 0.6);
+  --shadow-sm: 0 1px 2px rgba(2, 4, 12, 0.5);
+  --shadow-md: 0 14px 34px -12px rgba(2, 4, 12, 0.8), 0 3px 8px rgba(2, 4, 12, 0.4);
+  --shadow-lg: 0 32px 72px -18px rgba(2, 4, 12, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --grain: var(--grain-light);
+  --grain-opacity: 0.03;
+  --art-filter: brightness(0.84) saturate(0.88);
+}
+
+/* =====================================================================
+   MIDNIGHT — near-black for OLED screens, gold accent
+   ===================================================================== */
+.theme-obsidian {
+  color-scheme: dark;
+  --canvas: #0A0A0B;
+  --surface: #151516;
+  --raised: #1D1D1F;
+  --ink: #EEEAE2;
+  --ink-2: #BEB8AD;
+  --ink-3: #8F897F;
+  --ink-4: #57534D;
+  --line: rgba(238, 234, 226, 0.08);
+  --line-strong: rgba(238, 234, 226, 0.15);
+  --accent: #E2BE72;
+  --accent-ink: #1A1405;
+  --accent-soft: rgba(226, 190, 114, 0.12);
+  --accent-line: rgba(226, 190, 114, 0.36);
+  --gilt: #E2BE72;
+  --gilt-soft: rgba(226, 190, 114, 0.13);
+  --toast-accent: #6E4E0E;
+  --rubric: #F28B7F;
+
+  --hl-gold: rgba(226, 190, 114, 0.28);
+  --hl-rose: rgba(242, 139, 150, 0.26);
+  --hl-emerald: rgba(110, 196, 140, 0.24);
+  --hl-sky: rgba(116, 166, 236, 0.28);
+  --hl-amethyst: rgba(170, 146, 236, 0.28);
+
+  --glass: rgba(30, 30, 32, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.07);
+  --bezel: rgba(255, 255, 255, 0.035);
+  --scrim: rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 14px 34px -12px rgba(0, 0, 0, 0.8), 0 3px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 32px 72px -18px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --grain: var(--grain-light);
+  --grain-opacity: 0.025;
+  --art-filter: brightness(0.82) saturate(0.88);
+}
+
+/* =====================================================================
+   READING TYPEFACES — scale evens out each face's x-height
+   ===================================================================== */
+.font-serif { --reader-font: var(--font-text); --reader-scale: 0.96; }
+.font-classic { --reader-font: var(--font-classic); --reader-scale: 1.1; }
+.font-sans { --reader-font: var(--font-legible); --reader-scale: 0.95; }
