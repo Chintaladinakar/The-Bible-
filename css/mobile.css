@@ -47,54 +47,57 @@ input, textarea, select { font-size: 16px; }
 .pressable:active:not(:disabled) { transform: scale(0.97); }
 
 /* =====================================================================
-   SHEETS (native <dialog>: bottom sheet on phones, centred panel above 768px)
+   SHEETS (plain layers, no <dialog>: bottom sheet on phones, centred panel above 768px)
    ===================================================================== */
-dialog.sheet {
-  --sheet-pad: 20px;
+/* One full-screen layer holds the scrim and the sheets; the open sheet sits at its foot as an ordinary block,
+   so nothing depends on the browser's dialog handling (which misbehaves in iOS Safari) */
+.sheet-layer {
   position: fixed;
-  inset: auto 0 0 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-sheet);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overscroll-behavior: contain;
+}
+.sheet-layer[hidden] { display: none; }
+.sheet-scrim {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(28, 22, 12, 0.36);
+  background: var(--scrim, rgba(28, 22, 12, 0.36));
+  opacity: 0;
+  transition: opacity var(--dur-slow) ease;
+  touch-action: none;
+}
+.sheet-layer.is-open .sheet-scrim { opacity: 1; }
+
+.sheet {
+  --sheet-pad: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  max-width: 100%;
-  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
-  margin: 0;
-  padding: 0;
-  border: 0;
+  max-height: calc(100% - env(safe-area-inset-top, 0px) - 24px);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
   background: var(--raised);
   color: var(--ink);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  outline: none;
   transform: translateY(100%);
   transition: transform var(--dur-slow) var(--ease-sheet);
 }
-dialog.sheet:not([open]) { display: none; }
-dialog.sheet[open] { display: flex; flex-direction: column; }
-dialog.sheet.is-open { transform: translateY(0); }
-dialog.sheet.is-dragging { transition: none; }
-dialog.sheet--tall { height: min(88dvh, 860px); }
-
-dialog.sheet::backdrop {
-  background: rgba(28, 22, 12, 0.36);
-  background: var(--scrim, rgba(28, 22, 12, 0.36));
-  opacity: 0;
-  transition: opacity var(--dur-slow) ease;
-}
-dialog.sheet.is-open::backdrop { opacity: 1; }
-
-/* Browsers without <dialog> (Safari before 15.4): sheets sit above a scrim of their own */
-.sheet-fallback dialog.sheet { z-index: 91; }
-.sheet-scrim { display: none; }
-.sheet-fallback .sheet-scrim {
-  display: block;
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  background: var(--scrim, rgba(28, 22, 12, 0.36));
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--dur-slow) ease;
-}
-.sheet-fallback.has-sheet .sheet-scrim { opacity: 1; pointer-events: auto; }
+.sheet[hidden] { display: none; }
+.sheet.is-open { transform: translateY(0); }
+.sheet.is-dragging { transition: none; }
+.sheet--tall { height: min(88%, 860px); }
 
 .sheet-grip { flex-shrink: 0; touch-action: none; }
 .sheet-handle {
@@ -143,20 +146,18 @@ dialog.sheet.is-open::backdrop { opacity: 1; }
 }
 
 @media (min-width: 768px) {
-  dialog.sheet {
+  .sheet-layer { justify-content: center; align-items: center; padding: 32px 24px; }
+  .sheet {
     --sheet-pad: 24px;
-    inset: 0;
-    width: min(580px, calc(100vw - 48px));
-    height: fit-content;
-    max-height: min(780px, calc(100dvh - 64px));
-    margin: auto;
+    width: min(580px, 100%);
+    max-height: min(780px, 100%);
     border-radius: var(--r-xl);
     opacity: 0;
     transform: translateY(14px) scale(0.98);
     transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
   }
-  dialog.sheet--tall { height: min(780px, calc(100dvh - 64px)); }
-  dialog.sheet.is-open { opacity: 1; transform: none; }
+  .sheet--tall { height: min(780px, 100%); }
+  .sheet.is-open { opacity: 1; transform: none; }
   .sheet-handle { display: none; }
   .sheet-head { min-height: 64px; padding-top: 4px; }
   .sheet-body { padding-bottom: var(--sheet-pad); }

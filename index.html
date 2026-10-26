@@ -386,8 +386,12 @@
     </button>
   </div>
 
+  <!-- Sheets: one full-screen layer with a scrim; the open sheet sits at its foot -->
+  <div class="sheet-layer" id="sheet-layer" hidden>
+  <div class="sheet-scrim" id="sheet-scrim"></div>
+
   <!-- Sheet: cross references -->
-  <dialog id="xref-sheet" class="sheet sheet--tall" aria-labelledby="xref-title">
+  <div id="xref-sheet" class="sheet sheet--tall" role="dialog" aria-modal="true" tabindex="-1" hidden aria-labelledby="xref-title">
     <div class="sheet-grip" data-sheet-grip>
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="sheet-head">
@@ -398,10 +402,10 @@
       </div>
     </div>
     <div class="sheet-body" id="xref-body"></div>
-  </dialog>
+  </div>
 
   <!-- Sheet: permission to save on this device -->
-  <dialog id="consent-sheet" class="sheet" aria-labelledby="consent-title" aria-describedby="consent-lead">
+  <div id="consent-sheet" class="sheet" role="dialog" aria-modal="true" tabindex="-1" hidden aria-labelledby="consent-title" aria-describedby="consent-lead">
     <div class="sheet-grip" data-sheet-grip>
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="sheet-head">
@@ -421,10 +425,10 @@
       </div>
       <p class="consent-note">With “Not now”, what you just did lasts until you close the app.</p>
     </div>
-  </dialog>
+  </div>
 
   <!-- Sheet: book and chapter picker -->
-  <dialog id="picker-sheet" class="sheet sheet--tall" aria-labelledby="picker-title">
+  <div id="picker-sheet" class="sheet sheet--tall" role="dialog" aria-modal="true" tabindex="-1" hidden aria-labelledby="picker-title">
     <div class="sheet-grip" data-sheet-grip>
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="sheet-head">
@@ -458,10 +462,10 @@
         <div id="chapter-matrix" class="chapter-grid"></div>
       </div>
     </div>
-  </dialog>
+  </div>
 
   <!-- Sheet: reading settings -->
-  <dialog id="appearance-drawer" class="sheet" aria-labelledby="settings-title">
+  <div id="appearance-drawer" class="sheet" role="dialog" aria-modal="true" tabindex="-1" hidden aria-labelledby="settings-title">
     <div class="sheet-grip" data-sheet-grip>
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="sheet-head">
@@ -539,10 +543,10 @@
         <span>Install The Bible</span>
       </button>
     </div>
-  </dialog>
+  </div>
 
   <!-- Sheet: note -->
-  <dialog id="note-drawer" class="sheet" aria-labelledby="note-title">
+  <div id="note-drawer" class="sheet" role="dialog" aria-modal="true" tabindex="-1" hidden aria-labelledby="note-title">
     <div class="sheet-grip" data-sheet-grip>
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="sheet-head sheet-head--compose">
@@ -563,10 +567,10 @@
         </button>
       </div>
     </div>
-  </dialog>
+  </div>
 
   <!-- Sheet: share card -->
-  <dialog id="card-drawer" class="sheet" aria-labelledby="card-title">
+  <div id="card-drawer" class="sheet" role="dialog" aria-modal="true" tabindex="-1" hidden aria-labelledby="card-title">
     <div class="sheet-grip" data-sheet-grip>
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="sheet-head">
@@ -602,10 +606,10 @@
         </button>
       </div>
     </div>
-  </dialog>
+  </div>
 
   <!-- Sheet: memorize -->
-  <dialog id="memorize-drawer" class="sheet" aria-labelledby="memorize-title">
+  <div id="memorize-drawer" class="sheet" role="dialog" aria-modal="true" tabindex="-1" hidden aria-labelledby="memorize-title">
     <div class="sheet-grip" data-sheet-grip>
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="sheet-head">
@@ -627,7 +631,8 @@
       </div>
       <p class="setting-note">Say the verse aloud. Tap a blank to peek at a word, and step up a level when it comes easily.</p>
     </div>
-  </dialog>
+  </div>
+  </div>
 
   <div id="toast-container" class="toast-stack" role="status" aria-live="polite"></div>
 

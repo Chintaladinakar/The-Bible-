@@ -36,12 +36,13 @@
   --r-pill: 999px;
   --bezel-pad: 5px;
 
-  /* Layers (dialogs use the top layer and need none) */
+  /* Layers */
   --z-rail: 20;
   --z-bar: 30;
   --z-tabbar: 40;
   --z-toolbar: 50;
   --z-toast: 70;
+  --z-sheet: 80;
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);

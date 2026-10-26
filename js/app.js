@@ -292,7 +292,7 @@ class ScripturaApp {
       }
 
       // A tap outside the verse UI dismisses the verse toolbar
-      if (this.selectedVerse && !e.target.closest('.verse, .verse-toolbar, dialog')) this.dismissVerseAction();
+      if (this.selectedVerse && !e.target.closest('.verse, .verse-toolbar, #sheet-layer')) this.dismissVerseAction();
     });
 
     // Reader chrome
@@ -2193,26 +2193,31 @@ class ScripturaApp {
   // Sheets
   // =====================================================================
   setupSheets() {
-    // Older iPhones (Safari before 15.4) have no <dialog>: open the sheets by attribute over a scrim of our own
-    this.nativeSheets = typeof HTMLDialogElement === 'function' && typeof HTMLDialogElement.prototype.showModal === 'function';
-    if (!this.nativeSheets) {
-      document.documentElement.classList.add('sheet-fallback');
-      const scrim = document.createElement('div');
-      scrim.className = 'sheet-scrim';
-      scrim.addEventListener('click', () => this.closeAllDrawers());
-      document.body.appendChild(scrim);
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && this.openSheet) this.closeSheet(this.openSheet); });
-    }
-    document.querySelectorAll('dialog.sheet').forEach(sheet => {
-      // Escape: animate out instead of the instant native close
-      sheet.addEventListener('cancel', (e) => {
+    // Sheets are plain layers the app opens itself rather than <dialog>, so they behave the same everywhere, iOS Safari included
+    const layer = $('sheet-layer');
+    $('sheet-scrim').addEventListener('click', () => this.closeAllDrawers());
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !this.openSheet) return;
+      e.preventDefault();
+      this.closeSheet(this.openSheet);
+    });
+    // Keep keyboard focus inside the open sheet
+    layer.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab' || !this.openSheet) return;
+      const items = [...this.openSheet.querySelectorAll('button:not([disabled]), input, textarea, select, a[href], [tabindex]:not([tabindex="-1"])')]
+        .filter(el => el.offsetParent !== null);
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
-        this.closeSheet(sheet);
-      });
-      // Clicks that land on the dialog itself hit the backdrop
-      sheet.addEventListener('click', (e) => {
-        if (e.target === sheet) this.closeSheet(sheet);
-      });
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+    layer.querySelectorAll('.sheet').forEach(sheet => {
       sheet.querySelectorAll('.sheet-close-btn').forEach(btn => btn.addEventListener('click', () => this.closeSheet(sheet)));
       this.setupSheetDrag(sheet);
     });
@@ -2223,29 +2228,41 @@ class ScripturaApp {
     if (!sheet) return;
     if (this.openSheet && this.openSheet !== sheet) this.closeSheet(this.openSheet, { immediate: true, restoreFocus: false });
     else if (!this.openSheet) this.lastFocus = document.activeElement;
-    if (!sheet.hasAttribute('open')) {
-      if (this.nativeSheets) sheet.showModal();
-      else sheet.setAttribute('open', '');
-    }
+    const layer = $('sheet-layer');
+    layer.hidden = false;
+    sheet.hidden = false;
     this.openSheet = sheet;
+    // The rest of the page is out of reach while a sheet is open; only what was reachable gets restored
+    if (!this.inertWhileSheet) {
+      this.inertWhileSheet = [...document.body.children].filter(el => el !== layer && el.id !== 'toast-container' && el.tagName !== 'SCRIPT' && !el.hasAttribute('inert'));
+      this.inertWhileSheet.forEach(el => el.setAttribute('inert', ''));
+    }
     document.documentElement.classList.add('has-sheet');
     document.body.classList.remove('chrome-hidden');
     sheet.getBoundingClientRect(); // commit the closed position so the opening transition runs
-    requestAnimationFrame(() => sheet.classList.add('is-open'));
+    requestAnimationFrame(() => {
+      layer.classList.add('is-open');
+      sheet.classList.add('is-open');
+      if (!sheet.contains(document.activeElement)) sheet.focus({ preventScroll: true });
+    });
   }
 
   closeSheet(sheet, { immediate = false, restoreFocus = true } = {}) {
-    if (!sheet || !sheet.hasAttribute('open')) return;
+    if (!sheet || sheet.hidden) return;
+    const layer = $('sheet-layer');
     sheet.classList.remove('is-open', 'is-dragging');
     sheet.style.transform = '';
     if (this.openSheet === sheet) {
       this.openSheet = null;
       document.documentElement.classList.remove('has-sheet');
+      layer.classList.remove('is-open');
+      this.inertWhileSheet?.forEach(el => el.removeAttribute('inert'));
+      this.inertWhileSheet = null;
     }
     const finish = () => {
       if (sheet.classList.contains('is-open')) return; // reopened meanwhile
-      if (this.nativeSheets) sheet.close();
-      else sheet.removeAttribute('open');
+      sheet.hidden = true;
+      if (!this.openSheet) layer.hidden = true;
       if (restoreFocus && !this.openSheet && this.lastFocus?.isConnected) this.lastFocus.focus({ preventScroll: true });
       if (sheet.id === 'consent-sheet' && !this.consentAnswered) this.declineSaving();
       if (this.consentPending && !this.openSheet) setTimeout(() => this.openConsent(), 120);
