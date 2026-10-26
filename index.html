@@ -22,7 +22,6 @@
   <meta property="og:image" content="icons/icon-512.png">
   <meta property="og:type" content="website">
 
-  <link rel="preconnect" href="https://bible-api.com" crossorigin>
   <!-- Fonts are self-hosted so they work offline from the first install -->
   <link rel="preload" href="fonts/literata-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/fraunces-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -120,6 +119,10 @@
           <li><button class="passage-link pressable" data-goto="Isaiah|40"><span class="pl-ref">Isaiah 40</span><span class="pl-title">Wings as eagles</span></button></li>
         </ul>
       </section>
+      <div class="rail-credit">
+        <p>Designed by DC</p>
+        <nav class="credit-links" aria-label="Policies"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="licenses.html">Licenses</a></nav>
+      </div>
     </aside>
 
     <div class="main-col">
@@ -254,6 +257,10 @@
               <div id="reading-plans-list" class="plan-list"></div>
             </section>
           </div>
+          <footer class="app-credit">
+            <p>Designed by DC</p>
+            <nav class="credit-links" aria-label="Policies"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="licenses.html">Licenses</a></nav>
+          </footer>
         </section>
 
         <!-- SEARCH -->
@@ -422,7 +429,7 @@
         <button class="btn btn-primary pressable" id="consent-allow">Allow saving</button>
         <button class="btn btn-secondary pressable" id="consent-later">Not now</button>
       </div>
-      <p class="consent-note">With “Not now”, what you just did lasts until you close the app.</p>
+      <p class="consent-note">With “Not now”, what you just did lasts until you close the app. <a href="privacy.html">Privacy policy</a></p>
     </div>
   </div>
 
@@ -534,7 +541,7 @@
             <button class="btn btn-secondary btn-sm pressable" id="btn-data-toggle">Allow</button>
           </div>
         </div>
-        <p class="setting-note data-policy">Kept only in this browser and never sent anywhere. No tracking or advertising cookies.</p>
+        <p class="setting-note data-policy">Kept only in this browser and never sent anywhere. No tracking or advertising cookies. <a href="privacy.html">Privacy policy</a></p>
       </section>
 
       <button class="btn btn-secondary btn-block pressable pwa-install-btn hidden" id="settings-install">
@@ -585,7 +592,7 @@
           <svg class="vc-mark" aria-hidden="true"><use href="#i-cross"/></svg>
           <blockquote class="vc-text" id="card-preview-text"></blockquote>
           <figcaption class="vc-ref" id="card-preview-ref"></figcaption>
-          <span class="vc-brand">The Bible</span>
+          <span class="vc-sign"><span class="vc-brand">The Bible</span><span class="vc-credit">Designed by DC</span></span>
         </figure>
       </div>
       <div class="card-styles" role="radiogroup" aria-label="Card style">

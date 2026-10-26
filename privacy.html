@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-parchment font-serif">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Privacy — The Bible</title>
+  <meta name="description" content="How The Bible handles your data: no accounts, no tracking, no cookies; saved items stay in your browser and only with your permission.">
+  <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0C1020" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <script>
+    // Same theme as the app: read only, nothing is written here
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem('scriptura_preferences') || '{}');
+        var t = p.theme || 'auto';
+        if (t === 'auto' || ['theme-parchment', 'theme-sepia', 'theme-cathedral'].indexOf(t) < 0) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-cathedral' : 'theme-parchment';
+        document.documentElement.className = t + ' font-serif';
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/legal.css">
+</head>
+<body>
+  <main class="legal">
+    <header class="legal-top">
+      <a class="legal-brand" href="./"><img src="icons/favicon.svg" alt="" width="28" height="28">The Bible</a>
+      <a class="legal-back" href="./">Back to the app</a>
+    </header>
+
+    <h1>Privacy</h1>
+    <p class="legal-updated">Last updated 27 October 2026</p>
+    <p class="legal-lead">The Bible has no accounts, no analytics, no advertising and no cookies. What you save stays in your own browser, and only after you allow it.</p>
+
+    <h2>What is stored, and when</h2>
+    <p>Nothing is saved on your device until you allow it. The first time you save something (a highlight, bookmark, note, reading-plan tick or setting), the app asks <strong>“Save on this device?”</strong>.</p>
+    <ul>
+      <li><strong>Allow saving:</strong> your data is kept in this browser’s local storage so it is still there next time.</li>
+      <li><strong>Not now</strong> (or closing the question): what you did works until you close the app, then it is gone. Nothing is written to your device. The app asks again on a later visit.</li>
+    </ul>
+    <p>With saving allowed, the app keeps:</p>
+    <ul>
+      <li>Highlights, bookmarks and notes, with the verse text they belong to</li>
+      <li>Settings: theme, text size, translation and Telugu + English reading</li>
+      <li>Where you left off, the chapters you have finished and the days you read (for your streak)</li>
+      <li>Reading-plan progress</li>
+      <li>Chapters of the online translations (WEB, ASV, BBE) you have opened, so they work offline</li>
+      <li>Your answer to the question above, so it is not asked again</li>
+    </ul>
+    <p>All of this stays in this browser on this device. It is never sent to us or to anyone else, and it does not sync between devices.</p>
+
+    <h2>Cookies and similar technologies</h2>
+    <p>The Bible sets <strong>no cookies</strong>: no tracking, advertising or analytics cookies of any kind. It uses two browser features instead:</p>
+    <ul>
+      <li><strong>Local storage</strong> holds your saved data as described above, only with your permission.</li>
+      <li><strong>Offline storage</strong> (a service worker cache) keeps the app’s own files and the Bible books you open, so the app loads quickly and works without a connection. It contains app content only, never anything about you.</li>
+    </ul>
+
+    <h2>What leaves your device</h2>
+    <h3>Hosting</h3>
+    <p>The site is hosted on <a href="https://vercel.com" rel="noopener">Vercel</a>. Like any web host, Vercel receives the standard information a browser sends when it loads a page, such as your IP address, browser type and the time of the request, and may keep it in server logs to run and secure the service. The Bible does not receive or use these logs. See <a href="https://vercel.com/legal/privacy-policy" rel="noopener">Vercel’s privacy policy</a>.</p>
+    <h3>Online translations</h3>
+    <p>The King James Version and the Telugu Bible are built into the app. Only if you choose the <strong>WEB, ASV or BBE</strong> translation does the app request those chapters from <a href="https://bible-api.com" rel="noopener">bible-api.com</a>, which then receives your IP address and the chapter requested. If you never choose them, the app never contacts it.</p>
+    <h3>Sharing</h3>
+    <p>Verse cards are drawn on your device. When you tap Share, the picture goes only to the app you pick in your device’s share menu. Library backups are files saved on your device.</p>
+
+    <h2>Your choices</h2>
+    <ul>
+      <li><strong>Stop saving and delete everything:</strong> Reading settings → Your data → Turn off. A second tap confirms, and all saved data is removed from this browser.</li>
+      <li><strong>Remove offline files:</strong> clear this site’s data in your browser settings. Your own saved data is removed this way too.</li>
+      <li><strong>Keep a copy:</strong> Library → Export saves a backup file you can restore later.</li>
+    </ul>
+
+    <h2>Children</h2>
+    <p>The app collects no personal information from anyone, including children.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes, the new version is posted on this page with a new date.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or concerns: open an issue on the project’s <a href="https://github.com/Chintaladinakar/The-Bible-/issues" rel="noopener">GitHub page</a>.</p>
+
+    <footer class="legal-foot">
+      <nav aria-label="Policies">
+        <a href="privacy.html" aria-current="page">Privacy</a>
+        <a href="terms.html">Terms of use</a>
+        <a href="licenses.html">Licenses & credits</a>
+      </nav>
+      <p>© 2026 DC · Designed by DC</p>
+    </footer>
+  </main>
+</body>
+</html>

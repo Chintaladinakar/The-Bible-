@@ -166,11 +166,11 @@ class ScripturaApp {
     });
 
     const notes = {
-      kjv: 'King James Version, public domain. Built into the app, so every chapter opens instantly.',
-      tel: 'Telugu Bible (తెలుగు బైబిల్), public domain text from Arul John’s Bible-telugu collection. Built into the app; each book loads the first time you open it.'
+      kjv: 'King James Version, public domain (Crown copyright in the UK). Built into the app, so every chapter opens instantly.',
+      tel: 'Telugu Bible (తెలుగు బైబిల్) from Arul John’s Bible-telugu collection, MIT License. Built into the app; each book loads the first time you open it.'
     };
     const tr = translationById(this.preferences.translation);
-    setText('translation-note', notes[tr.id] || `${tr.name}, public domain. Chapters load from bible-api.com and stay on this device for offline reading.`);
+    setText('translation-note', notes[tr.id] || `${tr.name}, public domain. Chapters load from bible-api.com when you open them, and stay on this device for offline reading if you allow saving.`);
     this.updateOfflineRow();
     this.updateDataRow();
   }

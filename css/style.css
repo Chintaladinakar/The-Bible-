@@ -397,6 +397,28 @@ kbd { font: inherit; }
   background: transparent;
   text-align: left;
 }
+/* Credit: foot of Home on phones, foot of the sidebar on desktop */
+.app-credit {
+  margin-top: var(--s-12, 48px);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line);
+  font: 500 12.5px var(--font-ui);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  text-align: center;
+}
+.rail-credit {
+  margin-top: auto;
+  padding: 16px 10px 2px;
+  font: 500 12px var(--font-ui);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+.credit-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; letter-spacing: 0; }
+.app-credit .credit-links { justify-content: center; }
+.credit-links a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink-3); text-underline-offset: 3px; }
+.data-policy a, .consent-note a { color: var(--accent); text-underline-offset: 3px; }
+
 .rail-brand img { border-radius: 9px; box-shadow: var(--shadow-sm); }
 .wordmark {
   font-family: var(--font-display);
@@ -1608,10 +1630,17 @@ html.is-ready [data-dir="back"] .picker-pane.is-active { animation-name: pane-ba
   text-wrap: pretty;
 }
 .vc-ref { font: 600 11.5px var(--font-ui); letter-spacing: 0.16em; text-transform: uppercase; color: var(--vc-accent); }
-.vc-brand {
+.vc-sign {
   position: absolute;
   right: 22px;
-  bottom: 22px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.vc-credit { font: 500 10.5px var(--font-ui); letter-spacing: 0.04em; color: var(--vc-muted); opacity: 0.85; }
+.vc-brand {
   font-family: var(--font-display);
   font-size: 15px;
   font-weight: 560;
@@ -1778,6 +1807,7 @@ html.is-ready [data-dir="back"] .picker-pane.is-active { animation-name: pane-ba
     background: color-mix(in srgb, var(--surface) 55%, transparent);
   }
   .main-col { margin-left: var(--rail-w); }
+  .app-credit { display: none; }
   .top-bar { padding-top: 14px; }
   .view { padding-bottom: 120px; }
   .view:not(#view-reader) { padding-top: var(--s-10); }
