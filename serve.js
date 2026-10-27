@@ -16,7 +16,10 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
-  '.ico': 'image/x-icon'
+  '.ico': 'image/x-icon',
+  '.xml': 'application/xml; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
+  '.woff2': 'font/woff2'
 };
 
 const server = http.createServer((req, res) => {
@@ -27,8 +30,9 @@ const server = http.createServer((req, res) => {
 
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('404 Not Found');
+      // Same as Vercel: the site's own 404 page, with a real 404 status
+      res.writeHead(404, { 'Content-Type': MIME_TYPES['.html'], 'Cache-Control': 'no-cache' });
+      fs.createReadStream(path.join(__dirname, '404.html')).pipe(res);
       return;
     }
 

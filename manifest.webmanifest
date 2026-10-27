@@ -1,9 +1,9 @@
 {
   "name": "The Bible",
   "short_name": "The Bible",
-  "description": "A quiet Bible reader: four public-domain translations, chapters saved for offline reading, highlights and notes kept on your device, a daily verse and cross references.",
+  "description": "Read the King James Bible and the Telugu Bible side by side, free and offline, with a daily verse, cross references, highlights and notes kept on your device.",
   "id": "./",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
@@ -22,21 +22,21 @@
       "name": "Today’s verse",
       "short_name": "Today",
       "description": "The verse, reflection and prayer for today",
-      "url": "./index.html#home",
+      "url": "./#home",
       "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Psalm 23",
       "short_name": "Psalm 23",
       "description": "The Lord is my shepherd",
-      "url": "./index.html#book=Psalms&ch=23&open",
+      "url": "./#book=Psalms&ch=23&open",
       "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Search",
       "short_name": "Search",
       "description": "Search verses or jump to a reference",
-      "url": "./index.html#search&open",
+      "url": "./#search&open",
       "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]

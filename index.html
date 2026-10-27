@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-  <title>The Bible</title>
-  <meta name="description" content="A quiet Bible reader: the whole King James Bible and three other public-domain translations, chapters saved for offline reading, highlights and notes kept on your device, a daily verse and cross references.">
+  <title>The Bible – Read the KJV and Telugu Bible Online, Free</title>
+  <meta name="description" content="Read the King James Bible and the Telugu Bible (తెలుగు బైబిల్) side by side, free and offline. Daily verse, cross references, highlights and notes kept on your device.">
+  <link rel="canonical" href="https://thebible.dcbuilds.in/">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
@@ -17,15 +19,94 @@
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
 
-  <meta property="og:title" content="The Bible">
-  <meta property="og:description" content="Read the whole Bible with careful typography, offline chapters, highlights, notes and a daily verse.">
-  <meta property="og:image" content="icons/icon-512.png">
+  <!-- Link previews -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="The Bible">
+  <meta property="og:locale" content="en_IN">
+  <meta property="og:url" content="https://thebible.dcbuilds.in/">
+  <meta property="og:title" content="The Bible – Read the KJV and Telugu Bible Online">
+  <meta property="og:description" content="Read the King James Bible and the Telugu Bible side by side, free and offline, with a daily verse and cross references.">
+  <meta property="og:image" content="https://thebible.dcbuilds.in/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The Bible: read the King James Bible and the Telugu Bible side by side.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Bible – Read the KJV and Telugu Bible Online">
+  <meta name="twitter:description" content="Read the King James Bible and the Telugu Bible side by side, free and offline, with a daily verse and cross references.">
+  <meta name="twitter:image" content="https://thebible.dcbuilds.in/og-image.png">
+  <meta name="twitter:image:alt" content="The Bible: read the King James Bible and the Telugu Bible side by side.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://thebible.dcbuilds.in/#website",
+        "url": "https://thebible.dcbuilds.in/",
+        "name": "The Bible",
+        "description": "Read the King James Bible and the Telugu Bible (తెలుగు బైబిల్) side by side, free and offline. Daily verse, cross references, highlights and notes kept on your device.",
+        "inLanguage": [
+          "en",
+          "te"
+        ],
+        "publisher": {
+          "@id": "https://thebible.dcbuilds.in/#publisher"
+        }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://thebible.dcbuilds.in/#publisher",
+        "name": "DC"
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://thebible.dcbuilds.in/#app",
+        "name": "The Bible",
+        "url": "https://thebible.dcbuilds.in/",
+        "description": "Read the King James Bible and the Telugu Bible (తెలుగు బైబిల్) side by side, free and offline. Daily verse, cross references, highlights and notes kept on your device.",
+        "applicationCategory": "ReferenceApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "inLanguage": [
+          "en",
+          "te"
+        ],
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "INR"
+        },
+        "featureList": [
+          "King James Version and Telugu Bible side by side",
+          "World English Bible, American Standard Version and Bible in Basic English",
+          "Works offline",
+          "Cross references for each verse",
+          "Verse of the day, reflection and prayer",
+          "Highlights, bookmarks and notes stored on the device"
+        ],
+        "image": "https://thebible.dcbuilds.in/og-image.png",
+        "publisher": {
+          "@id": "https://thebible.dcbuilds.in/#publisher"
+        }
+      }
+    ]
+  }
+  </script>
 
   <!-- Fonts are self-hosted so they work offline from the first install -->
-  <link rel="preload" href="fonts/literata-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/fraunces-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/geist-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- Fetch every app module in parallel instead of one import at a time. Fonts are not preloaded:
+       on slow connections they held up the first paint (measured: LCP 4.5 s with preloads, 2.8 s without) -->
+  <link rel="modulepreload" href="js/app.js">
+  <link rel="modulepreload" href="js/bible-data.js">
+  <link rel="modulepreload" href="js/bible-source.js">
+  <link rel="modulepreload" href="js/storage.js">
+  <link rel="modulepreload" href="js/pwa.js">
+  <link rel="modulepreload" href="js/share-card.js">
+  <link rel="modulepreload" href="js/cross-refs.js">
+  <link rel="modulepreload" href="js/util.js">
 
   <script>
     // Apply the saved theme before first paint so night readers never see a light flash.
@@ -45,6 +126,13 @@
   <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body data-view="daily">
+  <noscript>
+    <div class="noscript-note">
+      <h1>The Bible</h1>
+      <p>Read the King James Bible and the Telugu Bible side by side, free and offline. This reader needs JavaScript to show the Bible text; please turn it on in your browser.</p>
+      <p><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="licenses.html">Licenses &amp; credits</a></p>
+    </div>
+  </noscript>
   <a class="skip-link" href="#reading-content">Skip to scripture</a>
 
   <!-- Icon set: 24px grid, 1.5 stroke, round joins -->
@@ -169,7 +257,7 @@
         </section>
 
         <!-- HOME -->
-        <section id="view-daily" class="view is-active" aria-labelledby="daily-heading">
+        <section id="view-daily" class="view is-active" aria-labelledby="home-title">
           <header class="view-head home-head">
             <div class="view-head-top">
               <div class="day-nav">
@@ -180,7 +268,7 @@
               </div>
               <button class="icon-btn pressable" data-action="open-settings" aria-haspopup="dialog" aria-label="Reading settings"><span class="aa-glyph" aria-hidden="true">Aa</span></button>
             </div>
-            <h1 class="view-title" id="daily-heading">Good morning</h1>
+            <h1 class="view-title" id="home-title"><span class="visually-hidden">The Bible: </span><span id="daily-heading">Good morning</span></h1>
             <p class="home-sub" id="home-sub">Here is your verse for today.</p>
           </header>
 
@@ -257,6 +345,12 @@
               <div id="reading-plans-list" class="plan-list"></div>
             </section>
           </div>
+          <section class="home-about" aria-labelledby="about-title">
+            <h2 class="section-title" id="about-title">About The Bible</h2>
+            <p>The Bible is a free Bible reader for the web. Read the complete King James Version and the Telugu Bible (<span lang="te">తెలుగు బైబిల్</span>) side by side, or the World English Bible, American Standard Version and Bible in Basic English.</p>
+            <p>It works offline, shows cross references for every verse, and gives you a verse of the day, reading plans and verses for how you feel. Highlights, bookmarks and notes stay on your device, with no account needed.</p>
+          </section>
+
           <footer class="app-credit">
             <p>Designed by DC</p>
             <nav class="credit-links" aria-label="Policies"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="licenses.html">Licenses</a></nav>

@@ -13,6 +13,8 @@ const THEME_COLORS = {
   'theme-sepia': '#F5EEE1',
   'theme-cathedral': '#0C1020'
 };
+// The title search engines index for the homepage; a chapter title only replaces it while reading
+const HOME_TITLE = document.title;
 const LIGHT_THEME = 'theme-parchment';
 const DARK_THEME = 'theme-cathedral';
 const TABS = ['daily', 'reader', 'search', 'library'];
@@ -596,6 +598,23 @@ class ScripturaApp {
     this.switchTab(tabId);
   }
 
+  // Downloads held back while the reader was out of sight (see renderReader)
+  wakeReader() {
+    const load = this.pendingChapterLoad;
+    this.pendingChapterLoad = null;
+    if (load) load();
+    if (!this.chapter) return;
+    CrossRefs.prefetch(this.chapter.book.id);
+    if (this.hasText()) this.loadParallel();
+  }
+
+  updateDocumentTitle() {
+    const titles = { search: 'Search — The Bible', library: 'Library — The Bible' };
+    document.title = this.activeTab === 'reader' && this.chapter
+      ? `${this.chapterLabel(this.chapter.book.name, this.chapter.ch)} — The Bible`
+      : titles[this.activeTab] || HOME_TITLE;
+  }
+
   switchTab(tabId, { restoreScroll = true } = {}) {
     if (!TABS.includes(tabId)) tabId = 'reader';
     if (this.activeTab !== tabId) this.scrollMemory[this.activeTab] = window.scrollY;
@@ -613,6 +632,7 @@ class ScripturaApp {
     document.querySelectorAll('.view').forEach(view => view.classList.toggle('is-active', view.id === `view-${tabId}`));
 
     if (tabId === 'reader' && this.chapter) Storage.saveLastRead(this.chapter.book.name, this.chapter.ch);
+    if (tabId === 'reader') this.wakeReader();
     if (tabId === 'library') this.renderLibrary();
     if (tabId === 'daily') this.renderContinueCard();
     if (tabId === 'search') this.updateSearchScope();
@@ -621,6 +641,7 @@ class ScripturaApp {
     window.scrollTo({ top: restoreScroll ? (this.scrollMemory[tabId] || 0) : 0, behavior: 'instant' });
     this.lastScrollY = window.scrollY;
     this.updateScrollState();
+    this.updateDocumentTitle();
     this.syncHash();
   }
 
@@ -699,8 +720,12 @@ class ScripturaApp {
     this.paintChapter({ animate, revealVerse });
 
     if (!cached && canLoad) {
+      const load = () => this.fetchChapter({ revealVerse });
+      // Out of sight (the app opens on Home), the chapter waits until the reader is opened,
+      // so the homepage downloads only what it shows
+      if (this.activeTab !== 'reader') this.pendingChapterLoad = load;
       // A short pause lets fast chapter-flipping skip requests it no longer needs
-      this.fetchTimer = setTimeout(() => this.fetchChapter({ revealVerse }), BibleSource.isLocal(tr) ? 30 : 80);
+      else this.fetchTimer = setTimeout(load, BibleSource.isLocal(tr) ? 30 : 80);
     } else {
       this.schedulePrefetch();
     }
@@ -713,7 +738,7 @@ class ScripturaApp {
 
   paintChapter({ animate = false, revealVerse = null } = {}) {
     const { book, ch, curated, status } = this.chapter;
-    CrossRefs.prefetch(book.id);
+    if (this.activeTab === 'reader') CrossRefs.prefetch(book.id);
     const label = this.chapterLabel(book.name, ch);
     const excerpt = status === 'curated' && BibleSource.isExcerpt(curated);
     const teluguHead = this.preferences.translation === 'tel' && status !== 'curated';
@@ -734,7 +759,7 @@ class ScripturaApp {
     const sub = $('chapter-subtitle');
     sub.textContent = subtitle || '';
     sub.classList.toggle('hidden', !subtitle);
-    document.title = `${label} — The Bible`;
+    this.updateDocumentTitle();
 
     this.renderNotice();
 
@@ -746,7 +771,7 @@ class ScripturaApp {
     if (status === 'loading') container.innerHTML = this.skeletonHTML(label);
     else if (status === 'missing') container.innerHTML = this.missingChapterHTML();
     else container.innerHTML = this.versesHTML();
-    this.loadParallel();
+    if (this.activeTab === 'reader') this.loadParallel();
 
     if (animate) {
       container.classList.add('is-entering');
@@ -937,6 +962,7 @@ class ScripturaApp {
   }
 
   abortChapterFetch() {
+    this.pendingChapterLoad = null;
     clearTimeout(this.fetchTimer);
     clearTimeout(this.prefetchTimer);
     if (this.fetchController) {

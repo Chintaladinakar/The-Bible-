@@ -20,6 +20,9 @@ Then open http://127.0.0.1:8080.
 - `fonts/`: self-hosted fonts (SIL Open Font License, see `fonts/licenses/`)
 - `sw.js`, `manifest.webmanifest`: offline support and installing as an app
 - `privacy.html`, `terms.html`, `licenses.html`: policy and licence pages
+- `404.html`: shown by Vercel (with a 404 status) for addresses that don't exist
+- `robots.txt`, `sitemap.xml`, `og-image.png`: search and link-preview files for https://thebible.dcbuilds.in/
+- `vercel.json`: redirects the old `thebible-zeta.vercel.app` address and sets cache headers
 
 ## Sources and licences
 

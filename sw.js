@@ -1,5 +1,5 @@
 // Scriptura Service Worker - offline app shell, fonts included
-const CACHE_NAME = 'scriptura-pwa-v20';
+const CACHE_NAME = 'scriptura-pwa-v21';
 // Downloaded Bible books live apart from the app shell so app updates never delete them
 const BIBLE_CACHE = 'scriptura-bibles-v1';
 const ASSETS_TO_CACHE = [

@@ -1,0 +1,6 @@
+# The Bible — https://thebible.dcbuilds.in/
+# Everything is public. Scripts, styles and Bible files stay crawlable so search engines can render the reader.
+User-agent: *
+Allow: /
+
+Sitemap: https://thebible.dcbuilds.in/sitemap.xml

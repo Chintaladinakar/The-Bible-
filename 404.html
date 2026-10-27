@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-parchment font-serif">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Page not found — The Bible</title>
+  <meta name="description" content="This page does not exist. Open The Bible to read the King James Version and the Telugu Bible.">
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0C1020" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
+  <link rel="apple-touch-icon" href="/icons/icon-180.png">
+  <script>
+    // Same theme as the app: read only, nothing is written here
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem('scriptura_preferences') || '{}');
+        var t = p.theme || 'auto';
+        if (t === 'auto' || ['theme-parchment', 'theme-sepia', 'theme-cathedral'].indexOf(t) < 0) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-cathedral' : 'theme-parchment';
+        document.documentElement.className = t + ' font-serif';
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="/css/fonts.css">
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/legal.css">
+</head>
+<body>
+  <main class="legal">
+    <header class="legal-top">
+      <a class="legal-brand" href="/"><img src="/icons/favicon.svg" alt="" width="28" height="28">The Bible</a>
+      <a class="legal-back" href="/">Back to the app</a>
+    </header>
+
+    <h1>Page not found</h1>
+    <p class="legal-updated">Error 404</p>
+    <p class="legal-lead">There is nothing at this address. The Bible reader itself lives on the home page.</p>
+    <p><a href="/">Open The Bible</a> to read the King James Version and the Telugu Bible side by side.</p>
+    <p>Other pages: <a href="/privacy.html">Privacy</a>, <a href="/terms.html">Terms of use</a> and <a href="/licenses.html">Licenses &amp; credits</a>.</p>
+
+    <footer class="legal-foot">
+      <nav aria-label="Policies">
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms of use</a>
+        <a href="/licenses.html">Licenses & credits</a>
+      </nav>
+      <p>© 2026 DC · Designed by DC</p>
+    </footer>
+  </main>
+</body>
+</html>

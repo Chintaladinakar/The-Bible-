@@ -397,6 +397,14 @@ kbd { font: inherit; }
   background: transparent;
   text-align: left;
 }
+/* About: a few plain sentences at the foot of Home */
+.home-about { margin-top: var(--s-12, 48px); max-width: 68ch; }
+.home-about p { margin-top: var(--s-3); font-size: 15px; line-height: 1.65; color: var(--ink-3); }
+
+.noscript-note { max-width: 640px; margin: 48px auto; padding: 0 20px; font-family: var(--font-ui); color: var(--ink); }
+.noscript-note h1 { font-family: var(--font-display); font-size: 36px; margin-bottom: 12px; }
+.noscript-note p { margin-bottom: 12px; color: var(--ink-2); line-height: 1.6; }
+
 /* Credit: foot of Home on phones, foot of the sidebar on desktop */
 .app-credit {
   margin-top: var(--s-12, 48px);
